@@ -1,0 +1,50 @@
+.mostrar-form-container {
+  width: 100%;
+  padding: 20px;
+  box-sizing: border-box;
+}
+
+.mostrar-form-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+/* Estilos para pantallas pequeñas */
+@media screen and (max-width: 768px) {
+  .mostrar-form-container {
+    padding: 10px;
+  }
+
+  /* Ajustes para las columnas en móvil */
+  .mostrar-form-table .ant-table {
+    font-size: 14px;
+  }
+
+  /* Hacer que las columnas de acciones se mantengan visibles */
+  .mostrar-form-table .ant-table-cell:last-child {
+    position: sticky;
+    right: 0;
+    background-color: #fff;
+    z-index: 2;
+  }
+}
+
+/* Ajustes para las celdas con múltiples líneas */
+.mostrar-form-table .productos-cell,
+.mostrar-form-table .cantidades-cell,
+.mostrar-form-table .precios-cell {
+  max-width: 150px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* Estilos para el contenedor de detalles */
+.detalles-container > div {
+  margin-bottom: 4px;
+  padding: 2px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.detalles-container > div:last-child {
+  border-bottom: none;
+}
