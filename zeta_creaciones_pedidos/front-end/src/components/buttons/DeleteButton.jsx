@@ -1,16 +1,26 @@
-// src/components/buttons/DeleteButton.jsx
 import React from 'react';
 import { Button, Popconfirm, message } from 'antd';
-import AppRequest from '../../helpers/AppRequest';
+import apiPedidos from '../../api/apiPedidos';
 import ErrorHandler from '../../helpers/ErrorHandler';
 
-const DeleteButton = ({ recordId, onDeleted }) => {
+const DeleteButton = ({ recordId, pedidos, setPedidos, fetchPedidos }) => {
   const handleDelete = async () => {
     try {
-      await AppRequest.delete(`/pedidos/${recordId}`);
-      message.success('Pedido eliminado');
-      onDeleted(recordId);
+      // Primero borramos en backend
+      await apiPedidos.deletePedido(recordId);
+
+      // Actualizamos estado local de forma segura
+      setPedidos(prev => prev.filter(p => p.id_pedido !== recordId));
+
+      message.success('Pedido eliminado correctamente');
+
+      // Refrescamos desde backend por si hubo cambios externos
+      if (fetchPedidos) {
+        await fetchPedidos();
+      }
+
     } catch (err) {
+      console.error(err);
       ErrorHandler(err);
     }
   };

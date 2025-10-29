@@ -6,9 +6,8 @@ const secretKey = process.env.JWT_SECRET || 'tu_clave_secreta_aqui';
 
 export const verificarToken = (req, res, next) => {
   const token = req.headers['authorization']?.split(' ')[1];
-
   if (!token) {
-    return res.status(401).json({ error: 'Token no proporcionado' });
+     console.log('Error JWT:', err); 
   }
 
   jwt.verify(token, secretKey, (err, decoded) => {
@@ -56,17 +55,27 @@ export const login = (req, res) => {
       secretKey,
       { expiresIn: '24h' }
     );
-
+    console.log('Usuario logueado:', {
+       id: user.id,
+       nombre: user.nombre,
+       apellido: user.apellido,
+       usuario: user.usuario,
+       email: user.email,
+       rol: user.id_rol,
+       token
+     });
     res.json({
       token,
       usuario: {
-        id: user.id,
-        nombre: user.nombre,
-        apellido: user.apellido,
-        usuario: user.usuario,
-        email: user.email,
-        rol: user.id_rol
+       id: results[0].id,
+         nombre: results[0].nombre,
+         apellido: results[0].apellido,
+         usuario: results[0].usuario,
+         email: results[0].email,
+         rol: results[0].id_rol // renombramos id_rol a rol
       }
+      
     });
   });
 };
+

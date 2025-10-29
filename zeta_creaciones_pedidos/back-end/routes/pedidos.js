@@ -1,7 +1,8 @@
 import express from 'express';
 import db from '../db/db.js';
 import { 
-  getPedidos, 
+  getPedidosActivos,
+  getPedidosFinalizados, 
   getPedido, 
   createPedido, 
   updatePedido, 
@@ -10,20 +11,28 @@ import {
 
 const router = express.Router();
 
-// Obtener todos los pedidos
-router.get('/', getPedidos);
+/* ===========================
+   RUTAS PRINCIPALES CONTROLADAS
+=========================== */
 
-// Obtener un pedido específico
-router.get('/:id', getPedido);
+// Obtener pedidos activos
+router.get('/activos', getPedidosActivos);
 
-// Crear nuevo pedido
+// Obtener pedidos finalizados
+router.get('/finalizados', getPedidosFinalizados);
+
+// Crear un nuevo pedido
 router.post('/', createPedido);
 
-// Actualizar pedido existente
+// Actualizar un pedido existente
 router.put('/:id', updatePedido);
 
-// Eliminar pedido
+// Eliminar un pedido
 router.delete('/:id', deletePedido);
+
+/* ===========================
+   RUTAS ESPECÍFICAS CON CONSULTAS DIRECTAS
+=========================== */
 
 // Obtener pedidos por cliente
 router.get('/cliente/:id_cliente', (req, res) => {
@@ -34,15 +43,15 @@ router.get('/cliente/:id_cliente', (req, res) => {
       p.estado,
       p.prioridad,
       p.fecha_creacion,
-      c.nombre as cliente_nombre,
-      c.direccion as cliente_direccion,
-      c.telefono as cliente_telefono,
-      c.dni as cliente_dni,
+      c.nombre AS cliente_nombre,
+      c.direccion AS cliente_direccion,
+      c.telefono AS cliente_telefono,
+      c.dni AS cliente_dni,
       dp.id_detalle,
       dp.cantidad,
       dp.precio_unitario,
       dp.subtotal,
-      pr.nombre as producto_nombre
+      pr.nombre AS producto_nombre
     FROM pedido p
     INNER JOIN cliente c ON p.id_cliente = c.id_cliente
     LEFT JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
@@ -57,7 +66,6 @@ router.get('/cliente/:id_cliente', (req, res) => {
       return res.status(500).json({ error: 'Error al obtener pedidos del cliente' });
     }
 
-    // Organizamos los resultados para agrupar los detalles por pedido
     const pedidosMap = new Map();
     results.forEach(row => {
       if (!pedidosMap.has(row.id_pedido)) {
@@ -76,7 +84,6 @@ router.get('/cliente/:id_cliente', (req, res) => {
           detalles: []
         });
       }
-      
       if (row.id_detalle) {
         pedidosMap.get(row.id_pedido).detalles.push({
           id_detalle: row.id_detalle,
@@ -101,15 +108,15 @@ router.get('/estado/:estado', (req, res) => {
       p.estado,
       p.prioridad,
       p.fecha_creacion,
-      c.nombre as cliente_nombre,
-      c.direccion as cliente_direccion,
-      c.telefono as cliente_telefono,
-      c.dni as cliente_dni,
+      c.nombre AS cliente_nombre,
+      c.direccion AS cliente_direccion,
+      c.telefono AS cliente_telefono,
+      c.dni AS cliente_dni,
       dp.id_detalle,
       dp.cantidad,
       dp.precio_unitario,
       dp.subtotal,
-      pr.nombre as producto_nombre
+      pr.nombre AS producto_nombre
     FROM pedido p
     INNER JOIN cliente c ON p.id_cliente = c.id_cliente
     LEFT JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
@@ -142,7 +149,6 @@ router.get('/estado/:estado', (req, res) => {
           detalles: []
         });
       }
-      
       if (row.id_detalle) {
         pedidosMap.get(row.id_pedido).detalles.push({
           id_detalle: row.id_detalle,
@@ -157,5 +163,10 @@ router.get('/estado/:estado', (req, res) => {
     res.json(Array.from(pedidosMap.values()));
   });
 });
+
+/* ===========================
+   ÚLTIMO: Obtener pedido por ID
+=========================== */
+router.get('/:id', getPedido);
 
 export default router;

@@ -4,23 +4,22 @@
   box-sizing: border-box;
 }
 
+/* Tabla principal */
 .mostrar-form-table {
   width: 100%;
-  overflow-x: auto;
+  table-layout: auto; /* columnas se ajustan al contenido */
 }
 
-/* Estilos para pantallas pequeñas */
+/* Ajustes para pantallas pequeñas */
 @media screen and (max-width: 768px) {
   .mostrar-form-container {
     padding: 10px;
   }
 
-  /* Ajustes para las columnas en móvil */
   .mostrar-form-table .ant-table {
     font-size: 14px;
   }
 
-  /* Hacer que las columnas de acciones se mantengan visibles */
   .mostrar-form-table .ant-table-cell:last-child {
     position: sticky;
     right: 0;
@@ -29,16 +28,16 @@
   }
 }
 
-/* Ajustes para las celdas con múltiples líneas */
+/* Ajustes para celdas con contenido múltiple */
 .mostrar-form-table .productos-cell,
 .mostrar-form-table .cantidades-cell,
 .mostrar-form-table .precios-cell {
-  max-width: 150px;
+  max-width: none; /* quitar límite para que se adapte */
   white-space: normal;
   word-break: break-word;
 }
 
-/* Estilos para el contenedor de detalles */
+/* Contenedor de detalles */
 .detalles-container > div {
   margin-bottom: 4px;
   padding: 2px 0;
@@ -47,4 +46,27 @@
 
 .detalles-container > div:last-child {
   border-bottom: none;
+}
+
+/* Cabecera de la tabla */
+.mostrar-form-table .ant-table-thead > tr > th {
+  background: #fafafa;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Celdas de la tabla */
+.mostrar-form-table .ant-table-tbody > tr > td {
+  padding: 8px 12px;
+  white-space: normal; /* forzar ajuste de contenido */
+}
+
+/* Hover en filas */
+.mostrar-form-table .ant-table-tbody > tr:hover > td {
+  background-color: #f5f5f5;
+}
+
+/* Quitar scroll horizontal del contenedor */
+.mostrar-form-table .ant-table-container {
+  overflow: visible;
 }

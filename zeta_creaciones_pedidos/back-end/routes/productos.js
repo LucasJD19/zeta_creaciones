@@ -1,15 +1,17 @@
 import express from 'express';
 import { 
-  getProductos, 
+  getProductosConCategorias, 
   getProducto, 
   createProducto, 
   updateProducto, 
-  deleteProducto 
+  deleteProducto,
+   getCategorias
 } from '../controllers/productoController.js';
 
 const router = express.Router();
 
-router.get('/', getProductos);
+router.get('/', getProductosConCategorias);
+router.get('/categorias', getCategorias);
 router.get('/:id', getProducto);
 router.post('/', createProducto);
 router.put('/:id', updateProducto);

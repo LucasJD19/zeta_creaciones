@@ -1,111 +1,143 @@
-.login-container {
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap');
+
+body {
+  font-family: 'Rubik', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+}
+
+.login-viewport {
   position: relative;
   height: 100vh;
-  width: 100%;
   overflow: hidden;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 
 .login-video {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  min-width: 100%;
-  min-height: 100%;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+  height: 100%;
   object-fit: cover;
   z-index: -2;
 }
 
-.overlay {
+.login-main {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0, 0, 0, 0.5);
-  z-index: -1;
-}
-
-.login-form {
-  background: rgba(0, 0, 0, 0.7);
-  padding: 40px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.75);
+  padding: 40px 30px;
   border-radius: 12px;
-  width: 320px;
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-}
-
-/* Estilos para los inputs */
-.login-form .ant-input {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: none !important;
-  border-radius: 6px !important;
-  height: 40px !important;
-  padding: 8px 16px !important;
-  margin-bottom: 16px !important;
-  font-size: 16px !important;
-  transition: all 0.3s ease !important;
-}
-
-.login-form .ant-input:hover,
-.login-form .ant-input:focus {
-  background: rgba(255, 255, 255, 1) !important;
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
-}
-
-/* Estilos para el botón de login */
-.login-form .ant-btn {
-  height: 40px !important;
-  font-size: 16px !important;
-  width: 100% !important;
-  margin-top: 16px !important;
-  background: #1890ff !important;
-  border: none !important;
-  border-radius: 6px !important;
-  transition: all 0.3s ease !important;
-}
-
-.login-form .ant-btn:hover {
-  background: #40a9ff !important;
-  box-shadow: 0 0 12px rgba(24, 144, 255, 0.5) !important;
-  transform: translateY(-1px) !important;
-}
-
-/* Estilos para los íconos dentro de los inputs */
-.login-form .ant-input-prefix {
-  margin-right: 12px !important;
-  color: rgba(0, 0, 0, 0.45) !important;
-}
-
-/* Estilos para las etiquetas de error */
-.login-form .ant-form-item-explain-error {
-  color: #ff4d4f !important;
-  font-size: 14px !important;
-  margin-top: 4px !important;
-  text-align: left !important;
-}
-
-/* Estilos para el título del formulario */
-.login-form h1 {
+  width: 380px;
   color: white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* Contenedor blanco del formulario */
+.login-form-container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 25px;
+  text-align: left;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Labels */
+.login-label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.required {
+  color: red;
+}
+
+.loginForm-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  background-color: #fff;
+  color: #000; /* 👈 Texto negro */
+}
+
+.loginForm-input::placeholder {
+  color: #555; /* 👈 Color del texto placeholder */
+}
+
+.loginForm-input:focus {
+  outline: none;
+  border-color: #00b2bf;
+  box-shadow: 0 0 5px rgba(0, 137, 191, 0.4);
+}
+
+
+/* Botón */
+.loginForm-button {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  background-color: #1890ff;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.loginForm-button:hover {
+  background-color: #40a9ff;
+  box-shadow: 0 0 12px rgba(24, 144, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Título */
+.login-main h1 {
+  color: #fff;
   margin-bottom: 24px;
   font-size: 24px;
   font-weight: 600;
 }
 
-/* Animación para los inputs al enfocar */
-.login-form .ant-input-affix-wrapper:focus,
-.login-form .ant-input-affix-wrapper-focused {
-  box-shadow: 0 0 8px rgba(255, 255, 255, 0.3) !important;
-  border-color: #1890ff !important;
+/* Errores */
+.error-message {
+  color: #ff4d4f;
+  font-size: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* Animación de entrada */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
 }
 
 /* Responsive */
 @media screen and (max-width: 480px) {
-  .login-form {
+  .login-main {
     width: 90%;
     padding: 30px 20px;
+  }
+
+  .login-form-container {
+    padding: 20px;
   }
 }

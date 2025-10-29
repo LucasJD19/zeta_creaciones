@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Button, Modal, Input, InputNumber, Select, DatePicker, Form, message } from 'antd';
+import { Button, Modal, Select, DatePicker, Form, message, Divider } from 'antd';
 import dayjs from 'dayjs';
 import AppRequest from '../../helpers/AppRequest';
 import ErrorHandler from '../../helpers/ErrorHandler';
@@ -10,52 +10,38 @@ const EditButton = ({ record, onUpdated }) => {
   const [visible, setVisible] = useState(false);
   const [form] = Form.useForm();
 
+  // Bloque corregido
   const initialValues = {
-    cliente: record.cliente || '',
-    direccion: record.direccion || '',
-    telefono: record.telefono || '',
-    producto: record.producto || '',
-    cantidad: record.cantidad || 1,
-    precio: record.precio || 0,
-    fecha_estimada: record.fecha_estimada ? dayjs(record.fecha_estimada, 'YYYY-MM-DD') : null,
+    fecha_estimada: record.fecha_estimada
+      ? dayjs(record.fecha_estimada, 'YYYY-MM-DD') // ← mantiene el formato interno correcto
+      : null,
     estado: record.estado || 'pendiente',
     prioridad: record.prioridad || 'media'
   };
 
   const openModal = () => {
     setVisible(true);
-    form.setFieldsValue(initialValues); // setear valores cada vez que se abre
+    form.setFieldsValue(initialValues);
   };
 
   const handleUpdate = async () => {
     try {
       const values = await form.validateFields();
 
-      // payload adaptado a tu backend
       const payload = {
-        nombre: values.cliente,            // cliente → nombre en tabla cliente
-        direccion: values.direccion,
-        telefono: values.telefono,
-        producto: values.producto,
-        cantidad: values.cantidad,
-        precio: values.precio,
         fecha_estimada: values.fecha_estimada
-          ? values.fecha_estimada.format('YYYY-MM-DD')
+          ? values.fecha_estimada.format('YYYY-MM-DD') // ← formato para guardar
           : null,
         estado: values.estado?.toLowerCase() || 'pendiente',
         prioridad: values.prioridad?.toLowerCase() || 'media'
       };
 
-      // llamamos al PUT usando el id_pedido
       await AppRequest.put(`/pedidos/${record.id_pedido}`, payload);
 
-      message.success('Pedido y cliente actualizados correctamente');
+      message.success('Pedido actualizado correctamente');
 
-      // actualizamos frontend: mapeamos nombre → cliente
-      onUpdated(record.id_pedido, {
-        ...payload,
-        cliente: payload.nombre || record.cliente,
-      });
+      // actualiza el pedido en la tabla (frontend)
+      onUpdated(record.id_pedido, { ...record, ...payload });
 
       setVisible(false);
     } catch (err) {
@@ -68,64 +54,32 @@ const EditButton = ({ record, onUpdated }) => {
       <Button type="primary" size="small" onClick={openModal}>
         Editar
       </Button>
+
       <Modal
-        title={`Editar Pedido #${record.id}`}
+        title={`Editar Pedido #${record.id_pedido}`}
         open={visible}
         onOk={handleUpdate}
         onCancel={() => setVisible(false)}
         okText="Guardar"
+        cancelText="Cancelar"
       >
+        {/* Información del cliente (solo lectura) */}
+        <div style={{ marginBottom: 10 }}>
+          <p><strong>Cliente:</strong> {record.cliente?.nombre}</p>
+          <p><strong>Teléfono:</strong> {record.cliente?.telefono}</p>
+          <p><strong>Dirección:</strong> {record.cliente?.direccion}</p>
+        </div>
+
+        <Divider />
+
         <Form form={form} layout="vertical">
+          {/* DatePicker con formato de visualización */}
           <Form.Item
-            label="Nombre del Cliente"
-            name="cliente"
-            rules={[{ required: true, message: 'Ingrese el nombre del cliente' }]}
+            label="Fecha Estimada"
+            name="fecha_estimada"
+            rules={[{ required: true, message: 'Seleccione la fecha estimada' }]}
           >
-            <Input placeholder="Cliente" />
-          </Form.Item>
-
-          <Form.Item
-            label="Dirección"
-            name="direccion"
-            rules={[{ required: true, message: 'Ingrese la dirección' }]}
-          >
-            <Input placeholder="Dirección" />
-          </Form.Item>
-
-          <Form.Item
-            label="Teléfono"
-            name="telefono"
-            rules={[{ required: true, message: 'Ingrese el teléfono' }]}
-          >
-            <Input placeholder="Teléfono" />
-          </Form.Item>
-
-          <Form.Item
-            label="Producto"
-            name="producto"
-            rules={[{ required: true, message: 'Ingrese el producto' }]}
-          >
-            <Input placeholder="Producto" />
-          </Form.Item>
-
-          <Form.Item
-            label="Cantidad"
-            name="cantidad"
-            rules={[{ required: true, message: 'Ingrese la cantidad' }]}
-          >
-            <InputNumber min={1} style={{ width: '100%' }} />
-          </Form.Item>
-
-          <Form.Item
-            label="Precio"
-            name="precio"
-            rules={[{ required: true, message: 'Ingrese el precio' }]}
-          >
-            <InputNumber
-              min={0}
-              style={{ width: '100%' }}
-              formatter={value => `$ ${value}`}
-            />
+            <DatePicker style={{ width: '100%' }} format="DD-MM-YYYY" />
           </Form.Item>
 
           <Form.Item
@@ -151,14 +105,6 @@ const EditButton = ({ record, onUpdated }) => {
               <Option value="finalizado">Finalizado</Option>
               <Option value="entregado">Entregado</Option>
             </Select>
-          </Form.Item>
-
-          <Form.Item
-            label="Fecha Estimada"
-            name="fecha_estimada"
-            rules={[{ required: true, message: 'Seleccione la fecha estimada' }]}
-          >
-            <DatePicker style={{ width: '100%' }} format="YYYY-MM-DD" />
           </Form.Item>
         </Form>
       </Modal>

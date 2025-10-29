@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import wallpaper from "../../assets/login_fondo.mp4";
+import wallpaper from "../../assets/wallpaper2_fondo.mp4";
 import "./Login.css";
 import AppRequest from "../../helpers/AppRequest";
 
@@ -13,60 +13,69 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
-    
+
     try {
-      const response = await AppRequest.post('/auth/login', {
+      const response = await AppRequest.post("/auth/login", {
         usuario: user,
-        password: pass
+        password: pass,
       });
-      
-      // Guardar el token y datos del usuario en localStorage
+
       localStorage.setItem("token", response.token);
       localStorage.setItem("usuario", JSON.stringify(response.usuario));
-      
-      // Configurar el token para futuras peticiones
       AppRequest.setAuthToken(response.token);
-      
+
       navigate("/home");
     } catch (err) {
-      setError(err.response?.data?.error || "Error al iniciar sesión");
+      setError(
+        err.response?.data?.error || "Usuario o contraseña incorrectos"
+      );
     }
   };
 
   return (
-    <div className="login-container">
-      <video autoPlay muted loop className="login-video">
+    <div className="login-viewport">
+      {/* Video de fondo */}
+      <video className="login-video" autoPlay muted loop>
         <source src={wallpaper} type="video/mp4" />
       </video>
 
-      <div className="overlay"></div>
+      {/* Contenedor principal */}
+      <div className="login-main">
+        <h1>Sistema de <br />Gestión de Pedidos</h1>
+        {error && <p className="error-message">{error}</p>}
 
-      <div className="login-form">
-        <h2 className="text-white mb-4">Iniciar Sesión</h2>
-        {error && <p className="text-danger">{error}</p>}
-        <form onSubmit={handleSubmit}>
-          <div className="mb-3">
+        {/* Contenedor blanco del formulario */}
+        <div className="login-form-container">
+          <form onSubmit={handleSubmit} className="login-form">
+            <label className="login-label">
+              Usuario <span className="required">*</span>
+            </label>
             <input
               type="text"
-              className="form-control"
-              placeholder="Usuario"
+              className="loginForm-input"
+              placeholder="Ingrese su usuario"
               value={user}
               onChange={(e) => setUser(e.target.value)}
+              required
             />
-          </div>
-          <div className="mb-3">
+
+            <label className="login-label">
+              Contraseña <span className="required">*</span>
+            </label>
             <input
               type="password"
-              className="form-control"
-              placeholder="Contraseña"
+              className="loginForm-input"
+              placeholder="Ingrese su contraseña"
               value={pass}
               onChange={(e) => setPass(e.target.value)}
+              required
             />
-          </div>
-          <button type="submit" className="btn btn-primary w-100">
-            Entrar
-          </button>
-        </form>
+
+            <button type="submit" className="loginForm-button">
+              Ingresar
+            </button>
+          </form>
+        </div>
       </div>
     </div>
   );

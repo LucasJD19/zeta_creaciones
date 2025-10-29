@@ -1,36 +1,27 @@
 import db from '../db/db.js';
 
-export const getPedidos = (req, res) => {
+// Pedidos activos (no finalizados)
+export const getPedidosActivos = (req, res) => {
   const sql = `
     SELECT 
-      p.id_pedido,
-      p.fecha_estimada,
-      p.estado,
-      p.prioridad,
-      p.fecha_creacion,
-      c.nombre as cliente_nombre,
-      c.direccion as cliente_direccion,
-      c.telefono as cliente_telefono,
-      c.dni as cliente_dni,
-      dp.id_detalle,
-      dp.cantidad,
-      dp.precio_unitario,
-      dp.subtotal,
-      pr.nombre as producto_nombre
+      p.id_pedido, p.fecha_estimada, p.estado, p.prioridad, p.fecha_creacion,
+      c.nombre AS cliente_nombre, c.direccion AS cliente_direccion, c.telefono AS cliente_telefono, c.dni AS cliente_dni,
+      dp.id_detalle, dp.cantidad, dp.precio_unitario, dp.precio_venta, dp.subtotal, dp.descripcion,
+      pr.nombre AS producto_nombre
     FROM pedido p
     INNER JOIN cliente c ON p.id_cliente = c.id_cliente
     LEFT JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
     LEFT JOIN productos pr ON dp.id_producto = pr.id_producto
+    WHERE p.finalizado = 0
     ORDER BY p.fecha_creacion DESC
   `;
 
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Error al obtener pedidos:', err);
-      return res.status(500).json({ error: 'Error al obtener pedidos' });
+      console.error('Error al obtener pedidos activos:', err);
+      return res.status(500).json({ error: 'Error al obtener pedidos activos' });
     }
 
-    // Organizamos los resultados para agrupar los detalles por pedido
     const pedidosMap = new Map();
     results.forEach(row => {
       if (!pedidosMap.has(row.id_pedido)) {
@@ -49,14 +40,16 @@ export const getPedidos = (req, res) => {
           detalles: []
         });
       }
-      
+
       if (row.id_detalle) {
         pedidosMap.get(row.id_pedido).detalles.push({
           id_detalle: row.id_detalle,
           producto_nombre: row.producto_nombre,
           cantidad: row.cantidad,
           precio_unitario: row.precio_unitario,
-          subtotal: row.subtotal
+          precio_venta: row.precio_venta,
+          subtotal: row.subtotal,
+          descripcion: row.descripcion
         });
       }
     });
@@ -64,6 +57,65 @@ export const getPedidos = (req, res) => {
     res.json(Array.from(pedidosMap.values()));
   });
 };
+
+//  Pedidos finalizados (historial)
+export const getPedidosFinalizados = (req, res) => {
+  const sql = `
+    SELECT 
+      p.id_pedido, p.fecha_estimada, p.estado, p.prioridad, p.fecha_creacion,
+      c.nombre AS cliente_nombre, c.direccion AS cliente_direccion, c.telefono AS cliente_telefono, c.dni AS cliente_dni,
+      dp.id_detalle, dp.cantidad, dp.precio_unitario, dp.precio_venta, dp.subtotal, dp.descripcion,
+      pr.nombre AS producto_nombre
+    FROM pedido p
+    INNER JOIN cliente c ON p.id_cliente = c.id_cliente
+    LEFT JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
+    LEFT JOIN productos pr ON dp.id_producto = pr.id_producto
+    WHERE p.finalizado = 1
+    ORDER BY p.fecha_creacion DESC
+  `;
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error('Error al obtener pedidos finalizados:', err);
+      return res.status(500).json({ error: 'Error al obtener pedidos finalizados' });
+    }
+
+    const pedidosMap = new Map();
+    results.forEach(row => {
+      if (!pedidosMap.has(row.id_pedido)) {
+        pedidosMap.set(row.id_pedido, {
+          id_pedido: row.id_pedido,
+          fecha_estimada: row.fecha_estimada,
+          estado: row.estado,
+          prioridad: row.prioridad,
+          fecha_creacion: row.fecha_creacion,
+          cliente: {
+            nombre: row.cliente_nombre,
+            direccion: row.cliente_direccion,
+            telefono: row.cliente_telefono,
+            dni: row.cliente_dni
+          },
+          detalles: []
+        });
+      }
+
+      if (row.id_detalle) {
+        pedidosMap.get(row.id_pedido).detalles.push({
+          id_detalle: row.id_detalle,
+          producto_nombre: row.producto_nombre,
+          cantidad: row.cantidad,
+          precio_unitario: row.precio_unitario,
+          precio_venta: row.precio_venta,
+          subtotal: row.subtotal,
+          descripcion: row.descripcion
+        });
+      }
+    });
+
+    res.json(Array.from(pedidosMap.values()));
+  });
+};
+
 
 export const getPedido = (req, res) => {
   const sql = `
@@ -73,15 +125,17 @@ export const getPedido = (req, res) => {
       p.estado,
       p.prioridad,
       p.fecha_creacion,
-      c.nombre as cliente_nombre,
-      c.direccion as cliente_direccion,
-      c.telefono as cliente_telefono,
-      c.dni as cliente_dni,
+      c.nombre AS cliente_nombre,
+      c.direccion AS cliente_direccion,
+      c.telefono AS cliente_telefono,
+      c.dni AS cliente_dni,
       dp.id_detalle,
       dp.cantidad,
       dp.precio_unitario,
+      dp.precio_venta,
       dp.subtotal,
-      pr.nombre as producto_nombre
+      dp.descripcion,
+      pr.nombre AS producto_nombre
     FROM pedido p
     INNER JOIN cliente c ON p.id_cliente = c.id_cliente
     LEFT JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
@@ -98,7 +152,6 @@ export const getPedido = (req, res) => {
       return res.status(404).json({ message: 'Pedido no encontrado' });
     }
 
-    // Organizamos el resultado
     const pedido = {
       id_pedido: results[0].id_pedido,
       fecha_estimada: results[0].fecha_estimada,
@@ -116,7 +169,9 @@ export const getPedido = (req, res) => {
         producto_nombre: row.producto_nombre,
         cantidad: row.cantidad,
         precio_unitario: row.precio_unitario,
-        subtotal: row.subtotal
+        precio_venta: row.precio_venta,
+        subtotal: row.subtotal,
+        descripcion: row.descripcion
       })) : []
     };
 
@@ -124,85 +179,91 @@ export const getPedido = (req, res) => {
   });
 };
 
-export const createPedido = (req, res) => {
-  const { id_cliente, fecha_estimada, estado, prioridad, detalles } = req.body;
 
-  if (!id_cliente || !fecha_estimada || !prioridad || !detalles || !detalles.length) {
-    return res.status(400).json({ 
-      error: 'id_cliente, fecha_estimada, prioridad y detalles son obligatorios' 
-    });
+export const createPedido = (req, res) => {
+  const { nombreCliente, dni, direccion, telefono, id_producto, cantidad, precio_unitario, precio_venta, descripcion, fecha_estimada, prioridad, estado } = req.body;
+
+  if (!nombreCliente || !dni || !id_producto || !cantidad || !precio_venta || !fecha_estimada || !prioridad) {
+    return res.status(400).json({ error: 'Faltan datos obligatorios' });
   }
 
-  // Iniciamos una transacción
   db.beginTransaction(err => {
-    if (err) {
-      console.error('Error al iniciar transacción:', err);
-      return res.status(500).json({ error: 'Error al crear pedido' });
-    }
+    if (err) return res.status(500).json({ error: 'Error al iniciar transacción' });
 
-    // 1. Insertar el pedido
-    const sqlPedido = `
-      INSERT INTO pedido (id_cliente, fecha_estimada, estado, prioridad)
-      VALUES (?, ?, ?, ?)
-    `;
+    // Buscar o crear cliente
+    const sqlCliente = `SELECT id_cliente FROM cliente WHERE nombre = ? AND dni = ? LIMIT 1`;
+    db.query(sqlCliente, [nombreCliente, dni], (err, resultCliente) => {
+      if (err) return db.rollback(() => res.status(500).json({ error: 'Error al buscar cliente' }));
 
-    db.query(sqlPedido, [
-      id_cliente, 
-      fecha_estimada, 
-      estado || 'pendiente', 
-      prioridad
-    ], (err, resultPedido) => {
-      if (err) {
-        return db.rollback(() => {
-          console.error('Error al crear pedido:', err);
-          res.status(500).json({ error: 'Error al crear pedido' });
+      let id_cliente;
+      if (resultCliente.length > 0) {
+        id_cliente = resultCliente[0].id_cliente;
+        insertarPedido();
+      } else {
+        const sqlInsertCliente = `INSERT INTO cliente (nombre, direccion, telefono, dni) VALUES (?, ?, ?, ?)`;
+        db.query(sqlInsertCliente, [nombreCliente, direccion, telefono, dni], (err, resultNewClient) => {
+          if (err) return db.rollback(() => res.status(500).json({ error: 'Error al crear cliente' }));
+          id_cliente = resultNewClient.insertId;
+          insertarPedido();
         });
       }
 
-      const id_pedido = resultPedido.insertId;
+      function insertarPedido() {
+        const sqlPedido = `INSERT INTO pedido (id_cliente, fecha_estimada, estado, prioridad) VALUES (?, ?, ?, ?)`;
+        db.query(sqlPedido, [id_cliente, fecha_estimada, estado || 'pendiente', prioridad], (err, resultPedido) => {
+          if (err) return db.rollback(() => res.status(500).json({ error: 'Error al crear pedido' }));
 
-      // 2. Insertar los detalles
-      const sqlDetalle = `
-        INSERT INTO detalle_pedido 
-        (id_pedido, id_producto, cantidad, precio_unitario, subtotal)
-        VALUES ?
-      `;
+          const id_pedido = resultPedido.insertId;
+          const subtotal = cantidad * precio_venta;
 
-      const detallesValues = detalles.map(d => [
-        id_pedido,
-        d.id_producto,
-        d.cantidad,
-        d.precio_unitario,
-        d.cantidad * d.precio_unitario
-      ]);
+          // Verificar stock actual del producto
+          const sqlStock = `SELECT stock FROM productos WHERE id_producto = ?`;
+          db.query(sqlStock, [id_producto], (err, resultStock) => {
+            if (err) return db.rollback(() => res.status(500).json({ error: 'Error al consultar stock' }));
+            if (resultStock.length === 0) return db.rollback(() => res.status(404).json({ error: 'Producto no encontrado' }));
 
-      db.query(sqlDetalle, [detallesValues], (err) => {
-        if (err) {
-          return db.rollback(() => {
-            console.error('Error al crear detalles del pedido:', err);
-            res.status(500).json({ error: 'Error al crear detalles del pedido' });
-          });
-        }
+            const stockActual = resultStock[0].stock;
 
-        // Commit de la transacción
-        db.commit(err => {
-          if (err) {
-            return db.rollback(() => {
-              console.error('Error al finalizar la transacción:', err);
-              res.status(500).json({ error: 'Error al crear pedido' });
+            if (stockActual < cantidad) {
+              return db.rollback(() => res.status(400).json({ error: 'Stock insuficiente para este producto' }));
+            }
+
+            // Descontar el stock
+            const sqlUpdateStock = `UPDATE productos SET stock = stock - ? WHERE id_producto = ?`;
+            db.query(sqlUpdateStock, [cantidad, id_producto], (err) => {
+              if (err) return db.rollback(() => res.status(500).json({ error: 'Error al actualizar stock' }));
+
+              // Insertar el detalle del pedido
+              const sqlDetalle = `
+                INSERT INTO detalle_pedido 
+                (id_pedido, id_producto, descripcion, cantidad, precio_unitario, precio_venta, subtotal)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
+              `;
+              db.query(sqlDetalle, [id_pedido, id_producto, descripcion || '', cantidad, precio_unitario || 0, precio_venta, subtotal], err => {
+                if (err) return db.rollback(() => res.status(500).json({ error: 'Error al crear detalle del pedido' }));
+
+                db.commit(err => {
+                  if (err) return db.rollback(() => res.status(500).json({ error: 'Error al finalizar transacción' }));
+
+                  res.status(201).json({
+                    message: 'Pedido creado correctamente y stock actualizado',
+                    id_pedido,
+                    cliente: nombreCliente,
+                    id_producto,
+                    cantidad,
+                    subtotal
+                  });
+                });
+              });
             });
-          }
-
-          res.status(201).json({
-            message: 'Pedido creado correctamente',
-            id_pedido,
-            detalles: detalles.length
           });
         });
-      });
+      }
     });
   });
 };
+
+
 
 export const updatePedido = (req, res) => {
   const { fecha_estimada, estado, prioridad, detalles } = req.body;
@@ -329,49 +390,24 @@ export const updatePedido = (req, res) => {
 };
 
 export const deletePedido = (req, res) => {
-  // Iniciamos una transacción
+  const id = req.params.id;
+
+  const sqlDeleteDetalles = 'DELETE FROM detalle_pedido WHERE id_pedido = ?';
+  const sqlDeletePedido = 'DELETE FROM pedido WHERE id_pedido = ?';
+
   db.beginTransaction(err => {
-    if (err) {
-      console.error('Error al iniciar transacción:', err);
-      return res.status(500).json({ error: 'Error al eliminar pedido' });
-    }
+    if (err) return res.status(500).json({ error: 'Error al iniciar transacción' });
 
-    // Primero eliminamos los detalles
-    const sqlDetalles = 'DELETE FROM detalle_pedido WHERE id_pedido = ?';
-    db.query(sqlDetalles, [req.params.id], (err) => {
-      if (err) {
-        return db.rollback(() => {
-          console.error('Error al eliminar detalles del pedido:', err);
-          res.status(500).json({ error: 'Error al eliminar pedido' });
-        });
-      }
+    db.query(sqlDeleteDetalles, [id], err => {
+      if (err) return db.rollback(() => res.status(500).json({ error: 'Error al eliminar detalles del pedido' }));
 
-      // Luego eliminamos el pedido
-      const sqlPedido = 'DELETE FROM pedido WHERE id_pedido = ?';
-      db.query(sqlPedido, [req.params.id], (err, result) => {
-        if (err) {
-          return db.rollback(() => {
-            console.error('Error al eliminar pedido:', err);
-            res.status(500).json({ error: 'Error al eliminar pedido' });
-          });
-        }
+      db.query(sqlDeletePedido, [id], (err) => {
+        if (err) return db.rollback(() => res.status(500).json({ error: 'Error al eliminar pedido' }));
 
-        if (result.affectedRows === 0) {
-          return db.rollback(() => {
-            res.status(404).json({ message: 'Pedido no encontrado' });
-          });
-        }
-
-        // Commit de la transacción
         db.commit(err => {
-          if (err) {
-            return db.rollback(() => {
-              console.error('Error al finalizar la transacción:', err);
-              res.status(500).json({ error: 'Error al eliminar pedido' });
-            });
-          }
+          if (err) return db.rollback(() => res.status(500).json({ error: 'Error al confirmar eliminación' }));
 
-          res.status(204).send();
+          res.status(200).json({ message: 'Pedido y sus detalles eliminados correctamente' });
         });
       });
     });
