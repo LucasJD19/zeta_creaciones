@@ -1,0 +1,12 @@
+### Obtener todos los pedidos con datos del cliente
+GET http://localhost:3001/pedidos
+Content-Type: application/json
+
+### hacer POST
+POST http://localhost:3001/pedidos/id
+Content-Type: application/json
+
+{
+    "id" : 5,
+    
+}
