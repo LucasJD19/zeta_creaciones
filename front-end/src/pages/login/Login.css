@@ -1,0 +1,143 @@
+@import url('https://fonts.googleapis.com/css2?family=Rubik:wght@400;600&display=swap');
+
+body {
+  font-family: 'Rubik', sans-serif;
+  margin: 0;
+  padding: 0;
+  background-color: #f5f5f5;
+}
+
+.login-viewport {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.login-video {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.75);
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+
+.login-main {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.75);
+  padding: 40px 30px;
+  border-radius: 12px;
+  text-align: center;
+  width: 380px;
+  color: white;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  animation: fadeIn 0.8s ease-out;
+}
+
+/* Contenedor blanco del formulario */
+.login-form-container {
+  background-color: white;
+  border-radius: 8px;
+  padding: 25px;
+  text-align: left;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+/* Labels */
+.login-label {
+  display: block;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 6px;
+  font-size: 15px;
+}
+
+.required {
+  color: red;
+}
+
+.loginForm-input {
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+  margin-bottom: 15px;
+  background-color: #fff;
+  color: #000; /* 👈 Texto negro */
+}
+
+.loginForm-input::placeholder {
+  color: #555; /* 👈 Color del texto placeholder */
+}
+
+.loginForm-input:focus {
+  outline: none;
+  border-color: #00b2bf;
+  box-shadow: 0 0 5px rgba(0, 137, 191, 0.4);
+}
+
+
+/* Botón */
+.loginForm-button {
+  width: 100%;
+  padding: 10px 16px;
+  font-size: 16px;
+  border-radius: 6px;
+  border: none;
+  background-color: #1890ff;
+  color: #fff;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.loginForm-button:hover {
+  background-color: #40a9ff;
+  box-shadow: 0 0 12px rgba(24, 144, 255, 0.6);
+  transform: translateY(-1px);
+}
+
+/* Título */
+.login-main h1 {
+  color: #fff;
+  margin-bottom: 24px;
+  font-size: 24px;
+  font-weight: 600;
+}
+
+/* Errores */
+.error-message {
+  color: #ff4d4f;
+  font-size: 14px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* Animación de entrada */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -45%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+  }
+}
+
+/* Responsive */
+@media screen and (max-width: 480px) {
+  .login-main {
+    width: 90%;
+    padding: 30px 20px;
+  }
+
+  .login-form-container {
+    padding: 20px;
+  }
+}
