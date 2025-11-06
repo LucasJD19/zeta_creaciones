@@ -15,7 +15,6 @@ export const getPedidosActivos = (req, res) => {
       c.direccion AS cliente_direccion,
       c.telefono AS cliente_telefono,
       c.dni AS cliente_dni,
-
       dp.id_detalle,
       dp.id_producto,
       dp.cantidad,
@@ -232,7 +231,6 @@ export const getPedido = (req, res) => {
       prioridad: base.prioridad,
       fecha_creacion: base.fecha_creacion,
       finalizado: !!base.finalizado,
-
       cliente: {
         id_cliente: base.id_cliente,
         nombre: base.cliente_nombre,
@@ -457,7 +455,6 @@ export const createPedido = (req, res) => {
   });
 };
 
-
 // Cambiar estado del pedido
 export const updateEstadoPedido = (req, res) => {
   const { id } = req.params;
@@ -526,7 +523,6 @@ export const updateCliente = (req, res) => {
       dni = COALESCE(?, dni)
     WHERE id_cliente = ?
   `;
-
 
   db.query(sql, [nombre, direccion, telefono, dni, id], (err, result) => {
     if (err) {
