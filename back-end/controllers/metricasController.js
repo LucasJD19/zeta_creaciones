@@ -19,23 +19,6 @@ export const getPorcentajeGananciaProductos = (req, res) => {
   });
 };
 
-// 2. Stock total por categoría
-export const getStockPorCategoria = (req, res) => {
-  const sql = `
-    SELECT c.nombre AS categoria, SUM(p.stock) AS stock_total
-    FROM productos p
-    JOIN categorias_productos c ON p.id_categoria = c.id_categoria
-    GROUP BY c.nombre
-  `;
-  
-  db.query(sql, (err, results) => {
-    if (err) {
-      console.error('Error al obtener stock por categoría:', err);
-      return res.status(500).json({ error: 'Error al obtener stock por categoría' });
-    }
-    res.json(results);
-  });
-};
 
 // 3. Pedidos por estado
 export const getPedidosPorEstado = (req, res) => {
@@ -109,6 +92,66 @@ export const getGananciasPorMes = (req, res) => {
     if (err) {
       console.error('Error al obtener ganancias por mes:', err);
       return res.status(500).json({ error: 'Error al obtener ganancias por mes' });
+    }
+    res.json(results);
+  });
+};
+
+// Total de pedidos, ingresos y egresos
+export const getTotalesGenerales = (req, res) => {
+  const sql = `
+    SELECT 
+      (SELECT COUNT(*) FROM pedido) AS total_pedidos,
+      (SELECT SUM(monto) FROM pagos) AS total_ingresos,
+      (SELECT SUM(precio_unitario * cantidad) FROM detalle_pedido) AS total_egresos
+  `;
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error al obtener totales generales:", err);
+      return res.status(500).json({ error: "Error al obtener totales" });
+    }
+    res.json(results[0]);
+  });
+};
+
+
+// Egresos por proveedor
+export const getEgresosPorProveedor = (req, res) => {
+  const sql = `
+    SELECT 
+      pr.nombre AS proveedor,
+      SUM(dp.precio_unitario * dp.cantidad) AS total_egreso
+    FROM detalle_pedido dp
+    INNER JOIN productos p ON dp.id_producto = p.id_producto
+    INNER JOIN proveedores pr ON p.id_proveedor = pr.id_proveedor
+    GROUP BY pr.nombre
+    ORDER BY total_egreso DESC;
+  `;
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error al obtener egresos por proveedor:", err);
+      return res.status(500).json({ error: "Error al obtener egresos" });
+    }
+    res.json(results);
+  });
+};
+
+
+// Ingresos por producto
+export const getIngresosPorProducto = (req, res) => {
+  const sql = `
+    SELECT 
+      p.nombre AS nombre_producto,
+      SUM(dp.precio_venta * dp.cantidad) AS total_ingreso
+    FROM detalle_pedido dp
+    INNER JOIN productos p ON dp.id_producto = p.id_producto
+    GROUP BY p.nombre
+    ORDER BY total_ingreso DESC;
+  `;
+  db.query(sql, (err, results) => {
+    if (err) {
+      console.error("Error al obtener ingresos por producto:", err);
+      return res.status(500).json({ error: "Error al obtener ingresos" });
     }
     res.json(results);
   });
