@@ -13,31 +13,33 @@ const UpdatePedidoModal = ({ visible, onClose, pedido }) => {
 useEffect(() => {
   if (pedido) {
     console.log("Pedido recibido en modal:", pedido);
+
+    const detalle = pedido.detalles?.[0] || {};
+    const producto = detalle.producto || {};
+    const pago = pedido.pagos?.[0] || {};
+
     form.setFieldsValue({
-      id_pedido: pedido?.id_pedido || "",
-      nombreCliente: pedido?.cliente?.nombre || "",
-      dni: pedido?.cliente?.dni || "",
-      direccion: pedido?.cliente?.direccion || "",
-      telefono: pedido?.cliente?.telefono || "",
-      id_producto: pedido?.detalles?.[0]?.producto?.id_producto 
-        || pedido?.detalles?.[0]?.id_producto 
-        || "",
-      cantidad: pedido?.detalles?.[0]?.cantidad || 1,
-      precio_unitario: pedido?.detalles?.[0]?.precio_unitario || 0,
-      precio_venta: pedido?.detalles?.[0]?.precio_venta || 0,
-      descripcion: pedido?.detalles?.[0]?.descripcion || "",
-      estado_pago: pedido?.detalles?.[0]?.estado_pago || "pendiente",
-      fecha_estimada: pedido?.fecha_estimada ? dayjs(pedido.fecha_estimada) : null,
-      prioridad: pedido?.prioridad || "media",
-      estado: pedido?.estado || "pendiente",
-      metodo_pago: pedido?.metodo_pago || "efectivo",
-      monto_pago:
-        pedido?.monto_pago_total ??
-        pedido?.detalles?.[0]?.monto_pago ??
-        0,
+      id_pedido: pedido.id_pedido || "",
+      id_pago: pedido.id_pago || "",
+      nombreCliente: pedido.cliente?.nombre || "",
+      dni: pedido.cliente?.dni || "",
+      direccion: pedido.cliente?.direccion || "",
+      telefono: pedido.cliente?.telefono || "",
+      id_producto: detalle.id_producto || producto.id_producto || "", // ✅ FIX
+      cantidad: detalle.cantidad || 1,
+      precio_unitario: detalle.precio_unitario || 0,
+      precio_venta: detalle.precio_venta || 0,
+      descripcion: detalle.descripcion || "",
+      estado_pago: detalle.estado_pago || "pendiente",
+      fecha_estimada: pedido.fecha_estimada ? dayjs(pedido.fecha_estimada) : null,
+      prioridad: pedido.prioridad || "media",
+      estado: pedido.estado || "pendiente",
+      metodo_pago: pago.metodo || pedido.metodo_pago || "efectivo",
+      monto_pago: pago.monto ?? pedido.monto_pago_total ?? 0,
     });
   }
 }, [pedido, form]);
+
 
 
 const handleSubmit = async (values) => {
@@ -45,11 +47,17 @@ const handleSubmit = async (values) => {
     setLoading(true);
 
     const idPedido = pedido.id_pedido;
-    const idCliente = pedido?.id_cliente; // CORREGIDO
+    const idCliente = pedido?.cliente?.id_cliente;
     const idDetalle = pedido?.detalles?.[0]?.id_detalle;
-    const idPago = pedido?.pagos?.[0]?.id_pago;
+    const idPago = values.id_pago || pedido?.id_pago || pedido?.pagos?.[0]?.id_pago;
 
-    // 1 Actualizar pedido principal
+    console.log("🟢 Valores del formulario:", values);
+    console.log("🔹 ID Pedido:", idPedido);
+    console.log("🔹 ID Cliente:", idCliente);
+    console.log("🔹 ID Detalle:", idDetalle);
+    console.log("🔹 ID Pago:", idPago);
+
+    // 1. Actualizar pedido
     await apiPedidos.update(idPedido, {
       fecha_estimada: values.fecha_estimada
         ? dayjs(values.fecha_estimada).format("YYYY-MM-DD")
@@ -58,47 +66,75 @@ const handleSubmit = async (values) => {
       prioridad: values.prioridad || pedido.prioridad,
     });
 
-    // 2 Actualizar cliente
+    // 2. Actualizar cliente
     if (idCliente) {
+      console.log("🟡 Enviando datos a updateCliente:");
+      console.log({
+        nombre: values.nombreCliente,
+        direccion: values.direccion,
+        telefono: values.telefono,
+        dni: values.dni,
+      });
+
       await apiPedidos.updateCliente(idCliente, {
-        nombre: values.nombreCliente || pedido.cliente_nombre,
-        direccion: values.direccion || pedido.cliente_direccion,
-        telefono: values.telefono || pedido.cliente_telefono,
-        dni: values.dni || pedido.cliente_dni,
+        nombre: values.nombreCliente,
+        direccion: values.direccion,
+        telefono: values.telefono,
+        dni: values.dni,
       });
     }
 
-    // 3 Actualizar detalle
-    await apiPedidos.updateDetalle(idDetalle, {
-        id_producto: values.id_producto,
-        cantidad: values.cantidad,
-        precio_unitario: values.precio_unitario || pedido.detalles[0]?.precio_unitario || 0,
-        precio_venta: values.precio_venta,
-        subtotal: (values.precio_unitario || pedido.detalles[0]?.precio_unitario || 0) * values.cantidad,
-        descripcion: values.descripcion,
-        estado_pago: values.estado_pago,
-        monto_pago: values.monto_pago ?? 0,
+    // 3. Actualizar detalle
+    console.log("🟣 Enviando datos a updateDetalle:");
+    console.log({
+      id_producto: values.id_producto,
+      cantidad: values.cantidad,
+      precio_unitario: values.precio_unitario,
+      precio_venta: values.precio_venta,
+      subtotal: (values.precio_unitario || 0) * values.cantidad,
+      descripcion: values.descripcion,
+      estado_pago: values.estado_pago,
+      monto_pago: values.monto_pago,
     });
 
-    // 4 Actualizar pago
+    await apiPedidos.updateDetalle(idDetalle, {
+      id_producto: values.id_producto,
+      cantidad: values.cantidad,
+      precio_unitario: values.precio_unitario,
+      precio_venta: values.precio_venta,
+      subtotal: (values.precio_unitario || 0) * values.cantidad,
+      descripcion: values.descripcion,
+      estado_pago: values.estado_pago,
+      monto_pago: values.monto_pago,
+    });
+
+    // 4. Actualizar pago
     if (idPago) {
+      console.log("🔵 Enviando datos a updatePago:");
+      console.log({
+        metodo: values.metodo_pago,
+        monto: values.monto_pago,
+        fecha_pago: dayjs().format("YYYY-MM-DD"),
+      });
+
       await apiPedidos.updatePago(idPago, {
         metodo: values.metodo_pago,
         monto: values.monto_pago,
         fecha_pago: dayjs().format("YYYY-MM-DD"),
       });
+    } else {
+      console.warn("⚠️ No hay idPago, no se actualiza la tabla pagos.");
     }
 
     message.success("Pedido actualizado correctamente");
     onClose(true);
   } catch (err) {
-    console.error("Error al actualizar:", err);
+    console.error("❌ Error al actualizar:", err);
     ErrorHandler(err);
   } finally {
     setLoading(false);
   }
 };
-
 
 
 return (

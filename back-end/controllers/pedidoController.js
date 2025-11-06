@@ -9,10 +9,13 @@ export const getPedidosActivos = (req, res) => {
       p.estado,
       p.prioridad,
       p.fecha_creacion,
+
+      c.id_cliente,
       c.nombre AS cliente_nombre,
       c.direccion AS cliente_direccion,
       c.telefono AS cliente_telefono,
       c.dni AS cliente_dni,
+
       dp.id_detalle,
       dp.id_producto,
       dp.cantidad,
@@ -22,10 +25,14 @@ export const getPedidosActivos = (req, res) => {
       dp.descripcion,
       dp.monto_pago,
       dp.estado_pago,
+
       pr.nombre AS producto_nombre,
+
+      pg.id_pago AS id_pago,
       pg.metodo AS metodo_pago,
       pg.monto AS monto_pago_total,
       pg.fecha_pago
+
     FROM pedido p
     INNER JOIN cliente c ON p.id_cliente = c.id_cliente
     LEFT JOIN detalle_pedido dp ON p.id_pedido = dp.id_pedido
@@ -37,8 +44,8 @@ export const getPedidosActivos = (req, res) => {
 
   db.query(sql, (err, results) => {
     if (err) {
-      console.error('Error al obtener pedidos activos:', err);
-      return res.status(500).json({ error: 'Error al obtener pedidos activos' });
+      console.error("Error al obtener pedidos activos:", err);
+      return res.status(500).json({ error: "Error al obtener pedidos activos" });
     }
 
     const pedidosMap = new Map();
@@ -47,16 +54,19 @@ export const getPedidosActivos = (req, res) => {
       if (!pedidosMap.has(row.id_pedido)) {
         pedidosMap.set(row.id_pedido, {
           id_pedido: row.id_pedido,
+          id_cliente: row.id_cliente,
           fecha_estimada: row.fecha_estimada,
           estado: row.estado,
           prioridad: row.prioridad,
           fecha_creacion: row.fecha_creacion,
           cliente: {
+            id_cliente: row.id_cliente,
             nombre: row.cliente_nombre,
             direccion: row.cliente_direccion,
             telefono: row.cliente_telefono,
             dni: row.cliente_dni
           },
+          id_pago: row.id_pago || null,
           metodo_pago: row.metodo_pago || null,
           monto_pago_total: row.monto_pago_total || 0,
           fecha_pago: row.fecha_pago || null,
@@ -64,7 +74,6 @@ export const getPedidosActivos = (req, res) => {
         });
       }
 
-      // Si existe detalle del pedido, lo agregamos
       if (row.id_detalle) {
         pedidosMap.get(row.id_pedido).detalles.push({
           id_detalle: row.id_detalle,
@@ -153,23 +162,45 @@ export const getPedido = (req, res) => {
 
   const sql = `
     SELECT 
-      p.id_pedido, p.fecha_estimada, p.estado, p.prioridad, p.fecha_creacion, p.finalizado,
+      -- Pedido
+      p.id_pedido,
+      p.id_cliente,
+      p.fecha_estimada,
+      p.estado,
+      p.prioridad,
+      p.fecha_creacion,
+      p.finalizado,
 
       -- Cliente
-      c.id_cliente, c.nombre AS cliente_nombre, c.dni AS cliente_dni, 
-      c.telefono AS cliente_telefono, c.direccion AS cliente_direccion,
+      c.nombre AS cliente_nombre,
+      c.dni AS cliente_dni, 
+      c.telefono AS cliente_telefono, 
+      c.direccion AS cliente_direccion,
 
       -- Pagos
-      pa.id_pago, pa.metodo AS pago_metodo, pa.monto AS pago_monto, pa.fecha_pago,
+      pa.id_pago, 
+      pa.metodo AS metodo_pago, 
+      pa.monto AS pago_monto, 
+      pa.fecha_pago,
 
       -- Detalle pedido
-      dp.id_detalle, dp.descripcion AS detalle_descripcion, dp.cantidad, 
-      dp.precio_unitario AS detalle_precio_unitario, dp.precio_venta AS detalle_precio_venta, dp.subtotal,
-      dp.estado_pago, dp.monto_pago,
+      dp.id_detalle, 
+      dp.descripcion AS detalle_descripcion, 
+      dp.cantidad, 
+      dp.precio_unitario AS detalle_precio_unitario, 
+      dp.precio_venta AS detalle_precio_venta, 
+      dp.subtotal,
+      dp.estado_pago, 
+      dp.monto_pago,
 
       -- Producto
-      pr.id_producto, pr.nombre AS producto_nombre, pr.precio_unitario AS producto_precio_unitario,
-      pr.precio_venta AS producto_precio_venta, pr.stock, pr.id_categoria, pr.id_proveedor
+      pr.id_producto, 
+      pr.nombre AS producto_nombre, 
+      pr.precio_unitario AS producto_precio_unitario,
+      pr.precio_venta AS producto_precio_venta, 
+      pr.stock, 
+      pr.id_categoria, 
+      pr.id_proveedor
 
     FROM pedido p
     INNER JOIN cliente c ON p.id_cliente = c.id_cliente
@@ -182,7 +213,7 @@ export const getPedido = (req, res) => {
 
   db.query(sql, [id], (err, results) => {
     if (err) {
-      console.error("Error al obtener pedido completo:", err);
+      console.error("❌ Error al obtener pedido completo:", err);
       return res.status(500).json({ error: "Error al obtener pedido completo" });
     }
 
@@ -191,13 +222,17 @@ export const getPedido = (req, res) => {
     }
 
     const base = results[0];
+
+    // Construcción base del pedido
     const pedido = {
       id_pedido: base.id_pedido,
+      id_cliente: base.id_cliente,
       fecha_estimada: base.fecha_estimada,
       estado: base.estado,
       prioridad: base.prioridad,
       fecha_creacion: base.fecha_creacion,
       finalizado: !!base.finalizado,
+
       cliente: {
         id_cliente: base.id_cliente,
         nombre: base.cliente_nombre,
@@ -205,15 +240,22 @@ export const getPedido = (req, res) => {
         telefono: base.cliente_telefono,
         direccion: base.cliente_direccion,
       },
+
       detalles: [],
       pagos: [],
+
+      // Campos raíz compatibles con tu front
+      id_pago: null,
+      metodo_pago: null,
+      monto_pago_total: 0,
+      fecha_pago: null,
     };
 
     const detallesSet = new Set();
     const pagosSet = new Set();
 
     results.forEach((r) => {
-      // Agregar detalle (evitando duplicados)
+      // Detalle del pedido
       if (r.id_detalle && !detallesSet.has(r.id_detalle)) {
         detallesSet.add(r.id_detalle);
         pedido.detalles.push({
@@ -237,37 +279,77 @@ export const getPedido = (req, res) => {
         });
       }
 
-      // Agregar pago (evitando duplicados)
+      // Pagos asociados
       if (r.id_pago && !pagosSet.has(r.id_pago)) {
         pagosSet.add(r.id_pago);
         pedido.pagos.push({
           id_pago: r.id_pago,
-          metodo: r.pago_metodo,
-          monto: r.pago_monto,
+          metodo: r.metodo_pago,
+          monto: Number(r.pago_monto),
           fecha_pago: r.fecha_pago,
         });
       }
     });
 
-    console.log("Pedido completo enviado al frontend:", JSON.stringify(pedido, null, 2));
+    // Calcular total de pagos
+    pedido.monto_pago_total = pedido.pagos.reduce((sum, p) => sum + p.monto, 0);
+
+    // Asegurar compatibilidad con front (primer pago visible directamente)
+    if (pedido.pagos.length > 0) {
+      const primerPago = pedido.pagos[0];
+      pedido.id_pago = primerPago.id_pago;
+      pedido.metodo_pago = primerPago.metodo;
+      pedido.fecha_pago = primerPago.fecha_pago;
+    }
+
+    console.log("✅ Pedido completo enviado al frontend:");
+    console.log(JSON.stringify(pedido, null, 2));
+
     res.status(200).json(pedido);
   });
 };
 
-export const createPedido = (req, res) => {
-  const { nombreCliente, dni, direccion, telefono, id_producto, cantidad, precio_unitario, precio_venta, descripcion, estado_pago, fecha_estimada, prioridad, estado } = req.body;
 
-  if (!nombreCliente || !dni || !id_producto || !cantidad || !precio_venta || !fecha_estimada || !prioridad) {
-    return res.status(400).json({ error: 'Faltan datos obligatorios' });
+
+export const createPedido = (req, res) => {
+  const {
+    nombreCliente,
+    dni,
+    direccion,
+    telefono,
+    id_producto,
+    cantidad,
+    precio_unitario,
+    precio_venta,
+    descripcion,
+    estado_pago,
+    monto_pago,
+    metodo_pago,
+    fecha_estimada,
+    prioridad,
+    estado
+  } = req.body;
+
+  if (
+    !nombreCliente ||
+    !dni ||
+    !id_producto ||
+    !cantidad ||
+    !precio_venta ||
+    !fecha_estimada ||
+    !prioridad ||
+    !metodo_pago
+  ) {
+    return res.status(400).json({ error: "Faltan datos obligatorios" });
   }
 
   db.beginTransaction(err => {
-    if (err) return res.status(500).json({ error: 'Error al iniciar transacción' });
+    if (err) return res.status(500).json({ error: "Error al iniciar transacción" });
 
     // Buscar o crear cliente
     const sqlCliente = `SELECT id_cliente FROM cliente WHERE nombre = ? AND dni = ? LIMIT 1`;
     db.query(sqlCliente, [nombreCliente, dni], (err, resultCliente) => {
-      if (err) return db.rollback(() => res.status(500).json({ error: 'Error al buscar cliente' }));
+      if (err) return db.rollback(() => res.status(500).json({ error: "Error al buscar cliente" }));
 
       let id_cliente;
       if (resultCliente.length > 0) {
@@ -276,16 +358,19 @@ export const createPedido = (req, res) => {
       } else {
         const sqlInsertCliente = `INSERT INTO cliente (nombre, direccion, telefono, dni) VALUES (?, ?, ?, ?)`;
         db.query(sqlInsertCliente, [nombreCliente, direccion, telefono, dni], (err, resultNewClient) => {
-          if (err) return db.rollback(() => res.status(500).json({ error: 'Error al crear cliente' }));
+          if (err) return db.rollback(() => res.status(500).json({ error: "Error al crear cliente" }));
           id_cliente = resultNewClient.insertId;
           insertarPedido();
         });
       }
 
       function insertarPedido() {
-        const sqlPedido = `INSERT INTO pedido (id_cliente, fecha_estimada, estado, prioridad) VALUES (?, ?, ?, ?)`;
-        db.query(sqlPedido, [id_cliente, fecha_estimada, estado || 'pendiente', prioridad], (err, resultPedido) => {
-          if (err) return db.rollback(() => res.status(500).json({ error: 'Error al crear pedido' }));
+        const sqlPedido = `
+          INSERT INTO pedido (id_cliente, fecha_estimada, estado, prioridad)
+          VALUES (?, ?, ?, ?)
+        `;
+        db.query(sqlPedido, [id_cliente, fecha_estimada, estado || "pendiente", prioridad], (err, resultPedido) => {
+          if (err) return db.rollback(() => res.status(500).json({ error: "Error al crear pedido" }));
 
           const id_pedido = resultPedido.insertId;
           const subtotal = cantidad * precio_venta;
@@ -293,42 +378,77 @@ export const createPedido = (req, res) => {
           // Verificar stock actual del producto
           const sqlStock = `SELECT stock FROM productos WHERE id_producto = ?`;
           db.query(sqlStock, [id_producto], (err, resultStock) => {
-            if (err) return db.rollback(() => res.status(500).json({ error: 'Error al consultar stock' }));
-            if (resultStock.length === 0) return db.rollback(() => res.status(404).json({ error: 'Producto no encontrado' }));
+            if (err) return db.rollback(() => res.status(500).json({ error: "Error al consultar stock" }));
+            if (resultStock.length === 0)
+              return db.rollback(() => res.status(404).json({ error: "Producto no encontrado" }));
 
             const stockActual = resultStock[0].stock;
+            if (stockActual < cantidad)
+              return db.rollback(() => res.status(400).json({ error: "Stock insuficiente para este producto" }));
 
-            if (stockActual < cantidad) {
-              return db.rollback(() => res.status(400).json({ error: 'Stock insuficiente para este producto' }));
-            }
-
-            // Descontar el stock
+            // Descontar stock
             const sqlUpdateStock = `UPDATE productos SET stock = stock - ? WHERE id_producto = ?`;
-            db.query(sqlUpdateStock, [cantidad, id_producto], (err) => {
-              if (err) return db.rollback(() => res.status(500).json({ error: 'Error al actualizar stock' }));
+            db.query(sqlUpdateStock, [cantidad, id_producto], err => {
+              if (err)
+                return db.rollback(() => res.status(500).json({ error: "Error al actualizar stock" }));
 
-              // Insertar el detalle del pedido
+              // Insertar detalle del pedido
               const sqlDetalle = `
-                INSERT INTO detalle_pedido 
-                (id_pedido, id_producto, descripcion, estado_pago, cantidad, precio_unitario, precio_venta, subtotal)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                INSERT INTO detalle_pedido
+                (id_pedido, id_producto, descripcion, estado_pago, monto_pago, cantidad, precio_unitario, precio_venta, subtotal)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
               `;
-              db.query(sqlDetalle, [id_pedido, id_producto, descripcion || '', estado_pago || 'pendiente', cantidad, precio_unitario || 0, precio_venta, subtotal], err => {
-                if (err) return db.rollback(() => res.status(500).json({ error: 'Error al crear detalle del pedido' }));
+              db.query(
+                sqlDetalle,
+                [
+                  id_pedido,
+                  id_producto,
+                  descripcion || "",
+                  estado_pago || "pendiente",
+                  monto_pago || 0,
+                  cantidad,
+                  precio_unitario || 0,
+                  precio_venta,
+                  subtotal
+                ],
+                err => {
+                  if (err)
+                    return db.rollback(() =>
+                      res.status(500).json({ error: "Error al crear detalle del pedido" })
+                    );
 
-                db.commit(err => {
-                  if (err) return db.rollback(() => res.status(500).json({ error: 'Error al finalizar transacción' }));
+                  // Insertar pago
+                  const sqlPago = `
+                    INSERT INTO pagos (id_pedido, metodo, monto, fecha_pago)
+                    VALUES (?, ?, ?, NOW())
+                  `;
+                  db.query(sqlPago, [id_pedido, metodo_pago, monto_pago || 0], err => {
+                    if (err)
+                      return db.rollback(() =>
+                        res.status(500).json({ error: "Error al registrar pago" })
+                      );
 
-                  res.status(201).json({
-                    message: 'Pedido creado correctamente y stock actualizado',
-                    id_pedido,
-                    cliente: nombreCliente,
-                    id_producto,
-                    cantidad,
-                    subtotal
+                    // Finalizar
+                    db.commit(err => {
+                      if (err)
+                        return db.rollback(() =>
+                          res.status(500).json({ error: "Error al finalizar transacción" })
+                        );
+
+                      res.status(201).json({
+                        message: "Pedido creado correctamente con detalle y pago",
+                        id_pedido,
+                        cliente: nombreCliente,
+                        id_producto,
+                        cantidad,
+                        subtotal,
+                        metodo_pago,
+                        monto_pago
+                      });
+                    });
                   });
-                });
-              });
+                }
+              );
             });
           });
         });
@@ -336,6 +456,7 @@ export const createPedido = (req, res) => {
     });
   });
 };
+
 
 // Cambiar estado del pedido
 export const updateEstadoPedido = (req, res) => {
@@ -361,6 +482,10 @@ export const updateEstadoPedido = (req, res) => {
 export const updatePedido = (req, res) => {
   const { id } = req.params;
   const { fecha_estimada, estado, prioridad } = req.body || {}; // ← evita el error si body no existe
+
+    console.log("Datos recibidos en updatePedido:");
+    console.log("Params:", req.params);
+    console.log("Body:", req.body);
 
   const sql = `
     UPDATE pedido
@@ -388,6 +513,10 @@ export const updateCliente = (req, res) => {
   const { id } = req.params;
   const { nombre, direccion, telefono, dni } = req.body;
 
+    console.log("Datos recibidos en updateCliente:");
+    console.log("Params:", req.params);
+    console.log("Body:", req.body);
+
   const sql = `
     UPDATE cliente
     SET 
@@ -397,6 +526,7 @@ export const updateCliente = (req, res) => {
       dni = COALESCE(?, dni)
     WHERE id_cliente = ?
   `;
+
 
   db.query(sql, [nombre, direccion, telefono, dni, id], (err, result) => {
     if (err) {
@@ -422,6 +552,10 @@ export const updateDetallePedido = (req, res) => {
     estado_pago,
     monto_pago,
   } = req.body;
+
+    console.log("Datos recibidos en updateDetallePedido:");
+    console.log("Params:", req.params);
+    console.log("Body:", req.body);
 
   const sql = `
     UPDATE detalle_pedido
@@ -456,6 +590,10 @@ export const updateDetallePedido = (req, res) => {
 export const updatePago = (req, res) => {
   const { id_pago } = req.params;
   const { metodo, monto, fecha_pago } = req.body;
+
+  console.log("Datos recibidos en updatePago:");
+  console.log("Params:", req.params);
+  console.log("Body:", req.body);
 
   const sql = `
     UPDATE pagos

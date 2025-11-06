@@ -8,7 +8,7 @@ import {
   Select,
   Divider,
   Space,
-  Radio,
+  Radio
 } from 'antd';
 import { EditOutlined } from '@ant-design/icons';
 import apiPedidos from '../api/apiPedidos';
@@ -110,21 +110,24 @@ const FormComponents = ({ pedidos, setPedidos }) => {
         return MessageNotifier.error('Stock insuficiente para este producto');
 
       const nuevoPedido = {
-        nombreCliente: values.nombreCliente,
-        dni: values.dni,
-        direccion: values.direccion,
-        telefono: values.telefono,
-        id_producto: values.producto,
-        cantidad: values.cantidad,
-        precio_unitario: values.precio_unitario,
-        precio_venta: values.precio_venta,
-        descripcion: values.descripcion,
-        fecha_estimada: values.fecha_estimada.format('YYYY-MM-DD'),
-        prioridad: values.prioridad,
-        estado: 'pendiente',
-      };
+         nombreCliente: values.nombreCliente,
+         dni: values.dni,
+         direccion: values.direccion,
+         telefono: values.telefono,
+         id_producto: values.producto,
+         cantidad: values.cantidad,
+         precio_unitario: values.precio_unitario,
+         precio_venta: values.precio_venta,
+         descripcion: values.descripcion,
+         fecha_estimada: values.fecha_estimada.format('YYYY-MM-DD'),
+         prioridad: values.prioridad,
+         estado: 'pendiente',
+         estado_pago: values.estado_pago || 'pendiente',
+         monto_pago: values.monto_pago || 0,
+         metodo_pago: values.metodo_pago || 'efectivo',
+       };
 
-      console.log('🧾 Enviando pedido al backend:', nuevoPedido);
+      console.log('Enviando pedido al backend:', nuevoPedido);
 
       const res = await apiPedidos.create(nuevoPedido);
 
@@ -182,7 +185,7 @@ const FormComponents = ({ pedidos, setPedidos }) => {
           </Form.Item>
         )}
 
-        {/* 🧩 Campos bloqueables */}
+        {/* Campos bloqueables */}
         <Form.Item
           name="nombreCliente"
           label="Nombre del Cliente"
@@ -285,6 +288,33 @@ const FormComponents = ({ pedidos, setPedidos }) => {
         <Form.Item name="fecha_estimada" label="Fecha Estimada" rules={[{ required: true }]}>
           <DatePicker style={{ width: '100%' }} />
         </Form.Item>
+
+        <Divider orientation="left">Datos de Pago</Divider>
+
+<Form.Item name="metodo_pago" label="Método de Pago" rules={[{ required: true }]}>
+  <Select placeholder="Seleccione método de pago">
+    <Option value="efectivo">Efectivo</Option>
+    <Option value="transferencia">Transferencia</Option>
+    <Option value="tarjeta">Tarjeta</Option>
+  </Select>
+</Form.Item>
+
+<Form.Item name="monto_pago" label="Monto Pagado">
+  <InputNumber
+    min={0}
+    style={{ width: '100%' }}
+    formatter={(value) => `$ ${value}`}
+    placeholder="Ingrese monto pagado (0 si no pagó aún)"
+  />
+</Form.Item>
+
+<Form.Item name="estado_pago" label="Estado del Pago">
+  <Select placeholder="Seleccione estado del pago">
+    <Option value="pendiente">Pendiente</Option>
+    <Option value="parcial">Parcial</Option>
+    <Option value="completo">Completo</Option>
+  </Select>
+</Form.Item>
 
         <Form.Item>
           <Button type="primary" htmlType="submit">
