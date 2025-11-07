@@ -9,15 +9,15 @@
 
 .home-text h1,
 .home-text p {
-  font-size: 1.3rem; /* mismo tamaño para h1 y p */
+  font-size: 1.3rem;
   color: #475569;
   margin-bottom: 10px;
 }
 
 .home-text h1 b,
 .home-text p b {
-  color: #25b3eb; /* color brillante igual para nombre y rol */
-  font-weight: 700; /* mismo grosor */
+  color: #25b3eb;
+  font-weight: 700;
 }
 
 .home-logo-container {
@@ -27,4 +27,21 @@
 .home-logo-container img {
   width: 250px;
   border-radius: 10px;
+  transition: transform 0.3s ease;
+}
+
+.home-logo-container img:hover {
+  transform: scale(1.05);
+}
+
+.home-description {
+  max-width: 600px;
+  margin: 20px auto 0;
+  color: #4b5563;
+  font-size: 1rem;
+  line-height: 1.6;
+  background: #f8fafc;
+  padding: 15px 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(37, 179, 235, 0.15);
 }

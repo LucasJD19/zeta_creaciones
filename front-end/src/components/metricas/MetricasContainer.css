@@ -1,0 +1,222 @@
+/* ============================
+   Estilos generales del contenedor
+============================ */
+
+.metricas-card {
+  background: #ffffff;
+  border-radius: 1.5rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.07);
+  padding: 2rem;
+  transition: transform 0.2s ease-in-out, box-shadow 0.3s ease;
+}
+
+.metricas-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.1);
+}
+
+.metricas-card h2 {
+  font-weight: 700;
+  color: #0d6efd;
+  letter-spacing: 0.5px;
+}
+
+/* ============================
+   Botón principal
+============================ */
+.metricas-btn {
+  background: linear-gradient(90deg, #007bff, #00c4ff);
+  border: none;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  transition: all 0.3s ease;
+}
+
+.metricas-btn:hover {
+  transform: scale(1.04);
+  box-shadow: 0 0 15px rgba(0, 123, 255, 0.4);
+}
+
+.metricas-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+
+/* ============================
+   Sección de gráficos
+============================ */
+
+/* ============================
+   Resumen Financiero
+============================ */
+.resumen-financiero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+/* Top: Total de pedidos centrado */
+.metricas-top {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.metric-total-pedidos {
+  background: #f8f9fa;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  width: 260px;
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.metric-total-pedidos:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+}
+
+/* Bottom: Ingresos, Egresos, Ganancia */
+.metricas-bottom {
+  display: flex;
+  justify-content: center;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Ingresos */
+.metric-ingresos {
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 128, 0, 0.3);
+}
+
+.metric-ingresos h2 {
+  color: #00d460; /* verde Bootstrap */
+}
+
+/* Egresos */
+.metric-egresos {
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+}
+
+.metric-egresos h2 {
+  color: #fc0019; /* rojo Bootstrap */
+}
+
+/* Ganancia neta */
+.metric-ganancia {
+  background-color: #ffffff;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+  color: #212529;
+}
+
+/* Transiciones suaves para todas */
+.metric-card {
+  transition: transform 0.2s ease, box-shadow 0.3s ease;
+}
+
+.metric-card:hover {
+  transform: translateY(-4px);
+}
+
+.metricas-charts {
+  margin-top: 2.5rem;
+}
+
+.chart-section {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 1.5rem 2rem;
+  margin-bottom: 2.5rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+.chart-section:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.chart-section h4 {
+  color: #004b93;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  border-left: 5px solid #007bff;
+  padding-left: 0.8rem;
+}
+
+/* ============================
+   Modal de análisis
+============================ */
+.modal-content {
+  border-radius: 1.2rem !important;
+  overflow: hidden;
+}
+
+.modal-header {
+  background: linear-gradient(90deg, #007bff, #00c4ff);
+  color: #fff;
+  border-bottom: none;
+  padding: 1rem 1.5rem;
+}
+
+.modal-title {
+  font-weight: 700;
+  letter-spacing: 0.4px;
+}
+
+.modal-body {
+  background: #f8fafc;
+}
+
+.modal-body .spinner-border {
+  width: 2.5rem;
+  height: 2.5rem;
+}
+
+.modal-footer {
+  border-top: none;
+}
+
+.btn-outline-secondary {
+  border-radius: 2rem;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+
+.btn-outline-secondary:hover {
+  background: #6c757d;
+  color: #fff;
+}
+
+/* ============================
+   Contenido generado
+============================ */
+.analisis-contenido {
+  background: #fff;
+  border-radius: 1rem;
+  padding: 2rem;
+  line-height: 1.7;
+  color: #343a40;
+  font-size: 0.95rem;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+/* ============================
+   Animaciones
+============================ */
+.fade-in {
+  animation: fadeIn 0.4s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

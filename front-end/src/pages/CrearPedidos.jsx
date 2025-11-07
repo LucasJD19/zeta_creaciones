@@ -1,7 +1,6 @@
 // src/pages/CrearPedidos.jsx
 import React from 'react';
-import FormComponents from '../components/FormComponents';
-
+import FormComponents from '../components/Forms/FormComponents';
 const CrearPedidos = ({ pedidos, setPedidos }) => {
   return (
     <div>

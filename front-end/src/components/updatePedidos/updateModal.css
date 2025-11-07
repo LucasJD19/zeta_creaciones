@@ -1,0 +1,63 @@
+.update-pedido-modal .ant-modal-content {
+  border-radius: 12px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.08);
+  font-family: 'Rubik', sans-serif;
+}
+
+.update-pedido-modal .ant-modal-title {
+  font-weight: 700;
+  color: #003a8c;
+  text-align: center;
+  font-size: 1.4rem;
+  letter-spacing: 0.3px;
+}
+
+.update-pedido-form {
+  padding: 8px 12px;
+}
+
+.ant-divider-inner-text {
+  font-weight: 600;
+  color: #1677ff;
+  letter-spacing: 0.4px;
+}
+
+.form-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.ant-input,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker {
+  border-radius: 8px !important;
+}
+
+.ant-form-item-label > label {
+  font-weight: 600;
+  color: #333;
+}
+
+.ant-btn-primary {
+  background-color: #1677ff;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.ant-btn-primary:hover {
+  background-color: #4096ff !important;
+}
+
+.form-buttons {
+  text-align: right;
+  margin-top: 24px;
+}
+
+@media (max-width: 600px) {
+  .form-section {
+    grid-template-columns: 1fr;
+  }
+}

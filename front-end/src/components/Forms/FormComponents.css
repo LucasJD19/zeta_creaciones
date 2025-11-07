@@ -1,0 +1,130 @@
+.form-container {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 32px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+  font-family: 'Rubik', sans-serif;
+  transition: all 0.3s ease;
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.form-container h2 {
+  color: #1677ff;
+  font-size: 1.8rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+/* === Dividers (títulos de secciones) === */
+.ant-divider-inner-text {
+  font-weight: 600;
+  color: #003a8c;
+  letter-spacing: 0.3px;
+}
+
+.ant-divider {
+  border-color: #e6f0ff;
+}
+
+/* === SECCIONES GENERALES === */
+.form-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+/* === CAMPOS === */
+.ant-form-item-label > label {
+  font-weight: 600;
+  color: #333;
+}
+
+.ant-input,
+.ant-input-number,
+.ant-select-selector,
+.ant-picker {
+  border-radius: 8px !important;
+}
+
+.ant-input:focus,
+.ant-input-number:focus-within,
+.ant-select-focused .ant-select-selector,
+.ant-picker-focused {
+  border-color: #1677ff !important;
+  box-shadow: 0 0 0 2px rgba(22, 119, 255, 0.1);
+}
+
+/* === BOTÓN PRINCIPAL === */
+.ant-btn-primary {
+  background-color: #1677ff;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  padding: 6px 20px;
+  transition: all 0.2s ease;
+}
+
+.ant-btn-primary:hover {
+  background-color: #4096ff !important;
+  transform: translateY(-1px);
+}
+
+/* === RADIO GROUP === */
+.ant-radio-group {
+  display: flex;
+  gap: 12px;
+}
+
+/* === SECCIÓN DATOS DEL CLIENTE === */
+.form-section-cliente {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.form-section-cliente .direccion,
+.form-section-cliente .telefono {
+  grid-column: span 1;
+}
+
+/* === SECCIÓN DATOS DEL PEDIDO === */
+.form-section-pedido {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+
+.form-section-pedido .precio-venta {
+  display: flex;
+  align-items: end;
+  gap: 10px;
+}
+
+/* Descripción del pedido ocupa todo el ancho */
+.form-descripcion {
+  grid-column: span 2;
+}
+
+/* === RESPONSIVE === */
+@media (max-width: 600px) {
+  .form-container {
+    padding: 18px;
+  }
+
+  .form-container h2 {
+    font-size: 1.4rem;
+  }
+
+  .form-section,
+  .form-section-cliente,
+  .form-section-pedido {
+    grid-template-columns: 1fr;
+  }
+
+  .form-descripcion {
+    grid-column: 1;
+  }
+}

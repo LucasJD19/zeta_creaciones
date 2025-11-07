@@ -5,6 +5,9 @@ import { LogoutOutlined } from '@ant-design/icons';
 import { useNavigate, useLocation } from 'react-router-dom';
 import layoutItems from './layoutItems';
 import AppRequest from '../../helpers/AppRequest' 
+import pedidosIcon from '../../../src/assets/pedidos_icon.gif'; // ajustá la ruta según tu estructura
+import './sidebar.css';
+
 
 const Sidebar = ({ collapsed, setCollapsed, isMobile }) => {
   const navigate = useNavigate();
@@ -37,14 +40,12 @@ const handleLogout = () => {
 
   return (
     <>
-      <div className="demo-logo-vertical"
-        style={{
-          height: 40,
-          margin: 16,
-          background: 'rgba(255, 255, 255, 0.1)',
-          borderRadius: token.borderRadius
-        }}
-      />
+        {/* GIF de pedidos arriba */}
+      <div className="sidebar-logo-container">
+        <img src={pedidosIcon} alt="Pedidos Icon" className="sidebar-logo-gif" />
+      </div>
+
+
       <div style={{
         display: 'flex',
         flexDirection: 'column',

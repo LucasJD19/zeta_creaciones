@@ -43,10 +43,14 @@ const Home = () => {
 
       <div className="home-logo-container">
         <img src={bienvenidaGif} alt="Bienvenida" />
+        <p className="home-description">
+          Presentamos: <br />
+          Sistema de Gestión de Pedidos: un sistema que sirve para <br />la gestión de los productos,
+          proveedores y los pedidos, proporcionando métricas totalmente profesionales.
+        </p>
       </div>
     </div>
   );
 };
 
 export default Home;
-

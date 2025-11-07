@@ -5,9 +5,6 @@ const MetricAPI = {
   // Porcentaje de ganancia por producto
   getGananciaProductos: () => AppRequest.get('/metricas/ganancia-productos'),
 
-  // Stock total por categoría
-  getStockCategoria: () => AppRequest.get('/metricas/stock-categoria'),
-
   // Pedidos por estado
   getPedidosEstado: () => AppRequest.get('/metricas/pedidos-estado'),
 
@@ -19,6 +16,11 @@ const MetricAPI = {
 
   // Ganancias obtenidas por mes
   getGananciasMes: () => AppRequest.get('/metricas/ganancias-mes'),
-};
 
+  getTotales: () => AppRequest.get('/metricas/totales'),
+
+  getIngresos: () => AppRequest.get('/metricas/ingresos'),
+
+  getEgresos: () => AppRequest.get('/metricas/egresos'),
+};
 export default MetricAPI;

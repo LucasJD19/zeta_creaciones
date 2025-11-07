@@ -1,6 +1,6 @@
 // src/pages/MisPedidos.jsx
 import React from 'react';
-import MostrarForm from '../components/MostrarForm';
+import MostrarForm from '../components/MostrarForms/MostrarForm';
 
 const MisPedidos = ({ pedidos, setPedidos }) => {
   return (

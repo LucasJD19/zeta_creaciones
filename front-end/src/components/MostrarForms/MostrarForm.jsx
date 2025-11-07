@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Table, Select, Tag, message, Popconfirm, Modal } from 'antd';
 import moment from 'moment';
-import apiPedidos from '../api/apiPedidos';
-import ErrorHandler from '../helpers/ErrorHandler';
-import EditButton from './buttons/EditButton';
-import DeleteButton from './buttons/DeleteButton';
+import { SyncOutlined } from '@ant-design/icons';
+import apiPedidos from '../../api/apiPedidos';
+import ErrorHandler from '../../helpers/ErrorHandler';
+import EditButton from '../buttons/EditButton';
+import DeleteButton from '../buttons/DeleteButton';
 import './MostrarForm.css';
 
 const { Option } = Select;
@@ -111,100 +112,111 @@ const MostrarForm = () => {
   });
 
   // Columnas de la tabla
-  const columns = [
-    { title: 'Cliente', dataIndex: ['cliente', 'nombre'], key: 'cliente_nombre' },
-    {
-      title: 'Productos',
-      dataIndex: 'detalles',
-      key: 'productos',
-      width: 150,
-      render: detalles => (
-        <div className="detalles-container productos-cell">
-          {detalles?.map((d, i) => <div key={d.id_detalle || i}>{d.producto_nombre}</div>)}
-        </div>
-      )
-    },
-    {
-      title: 'Cantidad',
-      dataIndex: 'detalles',
-      key: 'cantidad',
-      width: 100,
-      render: detalles => (
-        <div className="detalles-container cantidades-cell">
-          {detalles?.map((d, i) => <div key={d.id_detalle || i}>{d.cantidad}</div>)}
-        </div>
-      )
-    },
-    {
-      title: 'Subtotal',
-      dataIndex: 'detalles',
-      key: 'subtotal',
-      render: detalles => (
-        <div>
-          {detalles?.map((d, i) => (
-            <div key={d.id_detalle || i}>
-              {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(d.subtotal)}
-            </div>
-          ))}
-        </div>
-      )
-    },
-    { title: 'Dirección', dataIndex: ['cliente', 'direccion'], key: 'direccion' },
-    { title: 'Estado', dataIndex: 'estado', key: 'estado', render: (_, record) => <EstadoSelector key={`estado-${record.id_pedido}`} record={record} /> },
-    {
-      title: 'Plazo (días)',
-      key: 'plazo',
-      render: (_, record) => {
-        const hoy = moment();
-        const fechaEstimada = moment(record.fecha_estimada);
-        let diff = fechaEstimada.diff(hoy, 'days') + 1;
-        if (diff < 0) diff = 0;
-        let color = diff <= 5 ? 'red' : diff <= 10 ? 'gold' : 'green';
-        return <Tag color={color}>{diff} {diff === 1 ? 'día' : 'días'}</Tag>;
-      }
-    },
-    {
-      title: 'Prioridad',
-      dataIndex: 'prioridad',
-      key: 'prioridad',
-      render: prioridad => {
-        const key = prioridad?.toLowerCase() || '-';
-        return <Tag color={prioridadColors[key]}>{key !== '-' ? key.toUpperCase() : '-'}</Tag>;
-      }
-    },
-    {
-      title: 'Detalle Pedido',
-      key: 'detalle',
-      render: (_, record) => (
-        <a onClick={() => { setPedidoDetalle(record); setModalVisible(true); }}>Ver Detalle</a>
-      )
-    },
-    {
-      title: 'Acciones',
-      key: 'acciones',
-      render: (_, record) => (
-        <div style={{ display: 'flex', gap: 8 }}>
-          <EditButton record={record} onUpdated={async (id, nuevoRegistro) => {
+// Columnas de la tabla
+const columns = [
+  { 
+    title: 'Cliente', 
+    dataIndex: ['cliente', 'nombre'], 
+    key: 'cliente_nombre', 
+    width: 120,
+    ellipsis: true 
+  },
+  { 
+    title: 'Dirección', 
+    dataIndex: ['cliente', 'direccion'], 
+    key: 'direccion', 
+    width: 160, 
+    ellipsis: true 
+  },
+  {
+    title: 'Prioridad',
+    dataIndex: 'prioridad',
+    key: 'prioridad',
+    width: 100,
+    render: prioridad => {
+      const key = prioridad?.toLowerCase() || '-';
+      return (
+        <Tag color={prioridadColors[key]} style={{ fontSize: 11, padding: '2px 6px' }}>
+          {key !== '-' ? key.toUpperCase() : '-'}
+        </Tag>
+      );
+    }
+  },
+  { 
+    title: 'Estado', 
+    dataIndex: 'estado', 
+    key: 'estado', 
+    width: 140,
+    render: (_, record) => (
+      <EstadoSelector key={`estado-${record.id_pedido}`} record={record} />
+    )
+  },
+  {
+    title: 'Plazo',
+    key: 'plazo',
+    width: 90,
+    render: (_, record) => {
+      const hoy = moment();
+      const fechaEstimada = moment(record.fecha_estimada);
+      let diff = fechaEstimada.diff(hoy, 'days') + 1;
+      if (diff < 0) diff = 0;
+      let color = diff <= 5 ? 'red' : diff <= 10 ? 'gold' : 'green';
+      return (
+        <Tag color={color} style={{ fontSize: 11, padding: '2px 6px' }}>
+          {diff} {diff === 1 ? 'día' : 'días'}
+        </Tag>
+      );
+    }
+  },
+  {
+    title: 'Detalle Pedido',
+    key: 'detalle',
+    width: 110,
+    render: (_, record) => (
+      <a 
+        style={{ fontSize: 12 }}
+        onClick={() => { 
+          setPedidoDetalle(record); 
+          setModalVisible(true); 
+        }}
+      >
+        Ver Detalle
+      </a>
+    )
+  },
+  {
+    title: 'Acciones',
+    key: 'acciones',
+    width: 120,
+    render: (_, record) => (
+      <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
+        <EditButton 
+          record={record} 
+          onUpdated={async (id, nuevoRegistro) => {
             try {
               await apiPedidos.update(id, nuevoRegistro);
-              const updated = pedidos.map(p => p.id_pedido === id ? { ...p, ...nuevoRegistro } : p);
+              const updated = pedidos.map(p => 
+                p.id_pedido === id ? { ...p, ...nuevoRegistro } : p
+              );
               setPedidos(updated);
               message.success('Pedido actualizado correctamente');
             } catch (err) {
               console.error(err);
               ErrorHandler(err);
             }
-          }} />
-          <DeleteButton
-            recordId={record.id_pedido}
-            pedidos={pedidos}
-            setPedidos={setPedidos}
-            fetchPedidos={fetchPedidos} 
-          />
-        </div>
-      )
-    }
-  ];
+          }} 
+        />
+        <DeleteButton
+          recordId={record.id_pedido}
+          pedidos={pedidos}
+          setPedidos={setPedidos}
+          fetchPedidos={fetchPedidos}
+        />
+      </div>
+    )
+  }
+];
+
 
   const processedData = React.useMemo(() => 
     pedidos?.map(pedido => ({ ...pedido, key: pedido.id_pedido?.toString() || `temp-${Math.random()}` })) || [], 
@@ -213,7 +225,9 @@ const MostrarForm = () => {
 
   return (
     <div className="mostrar-form-container">
-      <h2>Pedidos en curso</h2>
+      <h2 className="mostrar-form-title">
+         Pedidos en curso
+     </h2>
       <Table
         className="mostrar-form-table"
         columns={columns}
@@ -224,24 +238,37 @@ const MostrarForm = () => {
         loading={loading}
       />
 
-      <Modal
-        title={`Detalle Pedido #${pedidoDetalle?.id_pedido}`}
+     <Modal
+        title={
+          <span className="detalle-modal-title">
+            Detalle del Pedido #{pedidoDetalle?.id_pedido}
+          </span>
+        }
         open={modalVisible}
         onCancel={() => setModalVisible(false)}
         footer={null}
         width={700}
+        className="detalle-pedido-modal"
       >
-        {pedidoDetalle?.detalles?.map(d => (
-          <div key={d.id_detalle} style={{ marginBottom: 10 }}>
-            <b>Producto:</b> {d.producto_nombre} <br />
-            <b>Cantidad:</b> {d.cantidad} <br />
-            <b>Precio Unitario:</b> {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(d.precio_unitario)} <br />
-            <b>Precio Venta:</b> {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(d.precio_venta)} <br />
-            <b>Subtotal:</b> {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(d.subtotal)} <br />
-            <b>Descripción:</b> {d.descripcion || '-'}
-          </div>
-        ))}
+        <div className="detalle-modal-container">
+          {pedidoDetalle?.detalles?.map((d) => (
+            <div key={d.id_detalle} className="detalle-item">
+              <div className="detalle-header">
+                <span className="detalle-producto">{d.producto_nombre}</span>
+                <span className="detalle-cantidad">x{d.cantidad}</span>
+              </div>
+
+              <div className="detalle-info">
+                <p><b>Precio Unitario:</b> {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(d.precio_unitario)}</p>
+                <p><b>Precio Venta:</b> {new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(d.precio_venta)}</p>
+                <p><b>Subtotal:</b> <span className="detalle-subtotal">{new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(d.subtotal)}</span></p>
+                <p><b>Descripción:</b> {d.descripcion || '-'}</p>
+              </div>
+            </div>
+          ))}
+        </div>
       </Modal>
+
     </div>
   );
 };

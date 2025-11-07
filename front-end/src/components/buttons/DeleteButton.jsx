@@ -32,7 +32,9 @@ const DeleteButton = ({ recordId, pedidos, setPedidos, fetchPedidos }) => {
       okText="Sí"
       cancelText="No"
     >
-      <Button danger size="small">Borrar</Button>
+      <Button danger size="small"
+        style={{ borderRadius: 4, fontSize: 13, padding: '10px 8px' }}
+      >Borrar</Button>
     </Popconfirm>
   );
 };

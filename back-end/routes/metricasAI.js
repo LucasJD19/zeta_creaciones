@@ -17,7 +17,7 @@ const client = new OpenAI({
 });
 
 // Utility para generar el prompt a partir de las métricas
-function buildPrompt({ gananciaProductos, stockCategoria, pedidosEstado, ventasProducto, clientesTop, gananciasMes }) {
+function buildPrompt({ gananciaProductos, pedidosEstado, ventasProducto, clientesTop, gananciasMes, totalesGenerales, egresosProveedor, ingresosProducto }) {
   return `
 Eres un analista de métricas para un emprendimiento. Recibirás datos JSON con arrays de métricas (nombre/campo/valor).
 Genera **solo el contenido HTML interno**, sin etiquetas <html>, <body> ni bloques de código (no incluyas \`\`\`html ni \`\`\`).
@@ -36,11 +36,13 @@ Genera **solo el contenido HTML interno**, sin etiquetas <html>, <body> ni bloqu
 
 Datos de entrada (JSON): ${JSON.stringify({
     gananciaProductos,
-    stockCategoria,
     pedidosEstado,
     ventasProducto,
     clientesTop,
-    gananciasMes
+    gananciasMes,
+    totalesGenerales,
+    egresosProveedor,
+    ingresosProducto
   }).slice(0, 1000)}  -- (nota: los datos reales vendrán en el body)
 `;
 }
@@ -54,7 +56,10 @@ router.post('/generar-analisis', async (req, res) => {
       pedidosEstado = [],
       ventasProducto = [],
       clientesTop = [],
-      gananciasMes = []
+      gananciasMes = [],
+      totalesGenerales = [],
+      egresosProveedor = [],
+      ingresosProducto = []
     } = req.body || {};
 
     const prompt = buildPrompt({
@@ -63,7 +68,10 @@ router.post('/generar-analisis', async (req, res) => {
       pedidosEstado,
       ventasProducto,
       clientesTop,
-      gananciasMes
+      gananciasMes,
+      totalesGenerales,
+      egresosProveedor,
+      ingresosProducto
     });
 
     const response = await client.chat.completions.create({

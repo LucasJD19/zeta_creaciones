@@ -212,7 +212,7 @@ export const getPedido = (req, res) => {
 
   db.query(sql, [id], (err, results) => {
     if (err) {
-      console.error("❌ Error al obtener pedido completo:", err);
+      console.error("Error al obtener pedido completo:", err);
       return res.status(500).json({ error: "Error al obtener pedido completo" });
     }
 
@@ -300,7 +300,7 @@ export const getPedido = (req, res) => {
       pedido.fecha_pago = primerPago.fecha_pago;
     }
 
-    console.log("✅ Pedido completo enviado al frontend:");
+    console.log("Pedido completo enviado al frontend:");
     console.log(JSON.stringify(pedido, null, 2));
 
     res.status(200).json(pedido);

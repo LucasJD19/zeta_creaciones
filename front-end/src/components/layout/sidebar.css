@@ -1,0 +1,26 @@
+.sidebar-logo-container {
+  text-align: center;
+  padding: 12px 0 4px 0;
+  background-color: rgba(255, 255, 255, 0.05);
+}
+
+.sidebar-logo-gif {
+  width: 60px;
+  height: 60px;
+  border-radius: 8px;
+  object-fit: cover;
+  opacity: 0.9;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.sidebar-logo-gif:hover {
+  transform: scale(1.08);
+  opacity: 1;
+}
+
+/* Cuando el sidebar está colapsado, el GIF se achica */
+.ant-layout-sider-collapsed .sidebar-logo-gif {
+  width: 35px;
+  height: 35px;
+  transition: width 0.2s ease, height 0.2s ease;
+}

@@ -1,0 +1,17 @@
+.table-row-light {
+  background-color: #fafafa;
+}
+
+.table-row-dark {
+  background-color: #f5f5f5;
+}
+
+.ant-table-thead > tr > th {
+  background-color: #e6f7ff;
+  color: #1890ff;
+  font-weight: 600;
+}
+
+.ant-tag {
+  font-weight: 600;
+}
