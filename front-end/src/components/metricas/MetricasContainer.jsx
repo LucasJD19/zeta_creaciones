@@ -208,66 +208,107 @@ const MetricasContainerTabs = () => {
         </div>
       ),
     },
-    {
-      key: '9',
-      label: 'Generar Análisis',
-      children: (
-        <div className="text-center mt-4">
-          <button
-            className="btn metricas-btn btn-lg px-4 rounded-pill shadow-sm"
-            onClick={handleGenerarAnalisis}
-            disabled={loadingAnalisis}
-          >
-            {loadingAnalisis ? (
-              <>
-                <span className="spinner-border spinner-border-sm me-2" />
-                Generando análisis...
-              </>
-            ) : 'Generar análisis'}
-          </button>
-          <p className="text-muted mt-2 mb-0">Obtén un reporte completo generado automáticamente</p>
+   {
+  key: '9',
+  label: 'Generar Análisis con AI',
+  children: (
+    <div className="text-center mt-5 analisis-section">
+      <div className="analisis-header mb-4">
+        <img
+          src={require('../../assets/ai_assistant.gif')}
+          alt="Asistente AI"
+          className="ai-assistant-gif"
+        />
+        <div className="analisis-description mt-3">
+          <h4>¡Hola! soy Iris y soy tu asistente AI</h4>
+          <p className="text-muted">
+            Me conecto con <strong>ChatGPT-4</strong> para analizar automáticamente las métricas de tu
+            sistema de gestión de pedidos. Evalúo el rendimiento de tus productos ofreciendo
+            <strong> estrategias de venta</strong> y <strong>críticas constructivas</strong> para optimizar tu negocio.
+            ¿Vamos a por ello?
+          </p>
+        </div>
+      </div>
+      <button
+        className="btn metricas-btn btn-lg px-4 rounded-pill shadow-sm"
+        onClick={handleGenerarAnalisis}
+        disabled={loadingAnalisis}
+      >
+        {loadingAnalisis ? (
+          <>
+            <span className="spinner-border spinner-border-sm me-2" />
+            Generando análisis...
+          </>
+        ) : (
+          'Generar análisis'
+        )}
+      </button>
 
-          {/* Modal */}
-          <div
-            className="modal fade"
-            id="analisisModal"
-            tabIndex="-1"
-            aria-labelledby="analisisModalLabel"
-            aria-hidden="true"
-          >
-            <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-              <div className="modal-content">
-                <div className="modal-header">
-                  <h5 className="modal-title" id="analisisModalLabel">Análisis de Métricas</h5>
-                  <button type="button" className="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
-                </div>
-                <div className="modal-body">
-                  {loadingAnalisis ? (
-                    <div className="text-center py-5">
-                      <div className="spinner-border text-primary mb-3" role="status"></div>
-                      <p className="text-muted">Analizando métricas, por favor espera...</p>
-                    </div>
-                  ) : (
-                    <div className="analisis-contenido fade-in" dangerouslySetInnerHTML={{ __html: analisisHtml }} />
-                  )}
-                </div>
-                <div className="modal-footer justify-content-center pb-4">
-                  <button type="button" className="btn btn-outline-secondary px-4" data-bs-dismiss="modal">Cerrar</button>
-                </div>
+        <p className="text-muted mt-2 mb-0">
+         Obtén un reporte completo generado automáticamente
+        </p>
+      </div>
+     ),
+    },
+ ];
+
+ return (
+  <div className="metricas-container container">
+    <h2 className="text-center mb-4">Métricas del Sistema</h2>
+
+    {/* Tabs */}
+    <Tabs defaultActiveKey="1" items={tabItems} type="line" size="large" />
+
+    {/* Modal — lo movemos fuera de las tabs */}
+    <div
+      className="modal fade"
+      id="analisisModal"
+      tabIndex="-1"
+      aria-labelledby="analisisModalLabel"
+      aria-hidden="true"
+    >
+      <div className="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div className="modal-content">
+          <div className="modal-header">
+            <h5 className="modal-title" id="analisisModalLabel">
+              Análisis de Métricas
+            </h5>
+            <button
+              type="button"
+              className="btn-close btn-close-white"
+              data-bs-dismiss="modal"
+              aria-label="Cerrar"
+            ></button>
+          </div>
+
+          <div className="modal-body">
+            {loadingAnalisis ? (
+              <div className="text-center py-5">
+                <div className="spinner-border text-primary mb-3" role="status"></div>
+                <p className="text-muted">Analizando métricas, por favor espera...</p>
               </div>
-            </div>
+            ) : (
+              <div
+                className="analisis-contenido fade-in"
+                dangerouslySetInnerHTML={{ __html: analisisHtml }}
+              />
+            )}
+          </div>
+
+          <div className="modal-footer justify-content-center pb-4">
+            <button
+              type="button"
+              className="btn btn-outline-secondary px-4"
+              data-bs-dismiss="modal"
+            >
+              Cerrar
+            </button>
           </div>
         </div>
-      ),
-    },
-  ];
-
-  return (
-    <div className="metricas-container container">
-      <h2 className="text-center mb-4">Métricas del Sistema</h2>
-      <Tabs defaultActiveKey="1" items={tabItems} type="line" size="large" />
+      </div>
     </div>
-  );
+  </div>
+ );
 };
 
 export default MetricasContainerTabs;

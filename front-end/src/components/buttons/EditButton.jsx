@@ -7,13 +7,13 @@ const EditButton = ({ record, onUpdated }) => {
   const [visible, setVisible] = useState(false);
 
   // Manejar el cierre del modal
-  const handleClose = (recargar) => {
-    setVisible(false);
-    if (recargar) {
-      // Si el modal retorna true, recargamos los datos actualizados
-      onUpdated(record.id_pedido);
-    }
-  };
+ const handleClose = (recargar, pedidoActualizado) => {
+  setVisible(false);
+  if (recargar && pedidoActualizado) {
+    onUpdated(pedidoActualizado.id_pedido, pedidoActualizado);
+   }
+ };
+
 
   return (
     <>

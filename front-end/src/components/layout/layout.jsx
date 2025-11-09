@@ -3,7 +3,7 @@ import { Layout, theme } from 'antd';
 import SideBar from './SideBar';
 import HeaderBar from './HeaderBar';
 import FooterBar from './FooterBar';
-
+import Breadcrumbs from './BreadCrumps';
 const { Sider, Content } = Layout;
 
 const AppLayout = ({ children }) => {
@@ -86,6 +86,7 @@ const AppLayout = ({ children }) => {
                 boxShadow: '0 1px 2px rgba(0, 0, 0, 0.03)'
               }}
             >
+              <Breadcrumbs />
               {children}
             </div>
           </Content>

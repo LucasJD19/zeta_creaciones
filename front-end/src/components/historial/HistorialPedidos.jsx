@@ -16,7 +16,7 @@ const HistorialPedidos = () => {
   const [checkedList, setCheckedList] = useState([]);
 
   const allColumns = [
-    { title: "ID Pedido", dataIndex: "id_pedido", key: "id_pedido", width: 100 },
+    { title: "ID Pedido", dataIndex: "id_pedido", key: "id_pedido", width: 50 },
     {
       title: "Fecha Creación",
       dataIndex: "fecha_creacion",
@@ -34,6 +34,7 @@ const HistorialPedidos = () => {
       title: "DNI",
       dataIndex: ["cliente", "dni"],
       key: "dni",
+      width: 100,
       render: (dni) => <div style={{ whiteSpace: "normal", wordBreak: "break-word" }}>{dni}</div>,
     },
     {

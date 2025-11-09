@@ -16,6 +16,7 @@ import apiProductos from '../../api/apiProductos';
 import apiClientes from '../../api/apiClientes';
 import MessageNotifier from '../../helpers/MessageNotifier';
 import './FormComponents.css';
+import { useWatch } from 'antd/es/form/Form';
 const { Option } = Select;
 
 const FormComponents = ({ pedidos, setPedidos }) => {
@@ -25,8 +26,9 @@ const FormComponents = ({ pedidos, setPedidos }) => {
   const [categorias, setCategorias] = useState([]);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState(null);
   const [precioVentaEditable, setPrecioVentaEditable] = useState(false);
-  const [modoCliente, setModoCliente] = useState('nuevo'); // 'nuevo' o 'existente'
-  const [camposBloqueados, setCamposBloqueados] = useState(false); // 🧩 nuevo estado
+  const [modoCliente, setModoCliente] = useState('nuevo'); 
+  const [camposBloqueados, setCamposBloqueados] = useState(false);
+  const [total, setTotal] = useState(0);
 
   // Cargar productos, categorías y clientes
   useEffect(() => {
@@ -55,7 +57,7 @@ const FormComponents = ({ pedidos, setPedidos }) => {
     if (productoSeleccionado) {
       form.setFieldsValue({
         precio_unitario: productoSeleccionado.precio_unitario,
-        precio_venta: productoSeleccionado.precio_unitario,
+        precio_venta: productoSeleccionado.precio_venta,
       });
       setPrecioVentaEditable(false);
     } else {
@@ -63,6 +65,13 @@ const FormComponents = ({ pedidos, setPedidos }) => {
       setPrecioVentaEditable(false);
     }
   };
+
+const precioVenta = useWatch('precio_venta', form) || 0;
+const cantidad = useWatch('cantidad', form) || 0;
+
+useEffect(() => {
+  setTotal(precioVenta * cantidad);
+}, [precioVenta, cantidad]);
 
   // Cuando selecciona un cliente existente
   const handleClienteExistente = (id_cliente) => {
@@ -157,8 +166,46 @@ const FormComponents = ({ pedidos, setPedidos }) => {
 {/* === DATOS DEL CLIENTE === */}
 <Divider orientation="left">Datos del Cliente</Divider>
 
+{/* Selector: Nuevo o Existente */}
+<Form.Item label="Tipo de Cliente" name="modoCliente" initialValue={modoCliente}>
+  <Radio.Group onChange={handleModoClienteChange}>
+    <Radio value="nuevo">Nuevo Cliente</Radio>
+    <Radio value="existente">Cliente Existente</Radio>
+  </Radio.Group>
+</Form.Item>
+
+{/* Si el cliente es existente, mostrar el selector */}
+{modoCliente === 'existente' && (
+  <Form.Item
+    name="clienteExistente"
+    label="Seleccionar Cliente"
+    rules={[{ required: true, message: 'Seleccione un cliente existente' }]}
+  >
+    <Select
+      showSearch
+      placeholder="Buscar cliente por nombre o DNI"
+      optionFilterProp="children"
+      onChange={handleClienteExistente}
+      filterOption={(input, option) =>
+        option?.children?.toLowerCase().includes(input.toLowerCase())
+      }
+    >
+      {clientes.map((c) => (
+        <Option key={c.id_cliente} value={c.id_cliente}>
+          {`${c.nombre} - DNI: ${c.dni}`}
+        </Option>
+      ))}
+    </Select>
+  </Form.Item>
+)}
+
+{/* Campos del cliente */}
 <div className="form-section-cliente">
-  <Form.Item name="nombreCliente" label="Nombre del Cliente" rules={[{ required: true, message: 'Ingrese el nombre del cliente' }]}>
+  <Form.Item
+    name="nombreCliente"
+    label="Nombre del Cliente"
+    rules={[{ required: true, message: 'Ingrese el nombre del cliente' }]}
+  >
     <Input placeholder="Nombre del cliente" disabled={camposBloqueados} />
   </Form.Item>
 
@@ -281,6 +328,10 @@ const FormComponents = ({ pedidos, setPedidos }) => {
           </Select>
         </Form.Item>
       </div>
+
+      <div style={{ textAlign: 'center', marginTop: 20 }}>
+      <h3>Total del Pedido: <span style={{ color: '#007bff' }}>${total.toFixed(2)}</span></h3>
+     </div>
 
       <Form.Item style={{ textAlign: 'center', marginTop: 20 }}>
         <Button type="primary" htmlType="submit" size="large">

@@ -20,11 +20,16 @@ const UpdatePedidoModal = ({ visible, onClose, pedido }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
 
+
   useEffect(() => {
     if (pedido) {
       const detalle = pedido.detalles?.[0] || {};
       const producto = detalle.producto || {};
       const pago = pedido.pagos?.[0] || {};
+      const cantidad = detalle.cantidad || 1;
+      const precioVenta = detalle.precio_venta || 0;
+      const montoPago = pago.monto ?? pedido.monto_pago_total ?? 0;
+      const totalCalculado = cantidad * precioVenta;
 
       form.setFieldsValue({
         id_pedido: pedido.id_pedido || "",
@@ -47,6 +52,31 @@ const UpdatePedidoModal = ({ visible, onClose, pedido }) => {
       });
     }
   }, [pedido, form]);
+
+<Form.Item
+  shouldUpdate={(prev, curr) =>
+    prev.cantidad !== curr.cantidad ||
+    prev.precio_venta !== curr.precio_venta ||
+    prev.monto_pago !== curr.monto_pago ||
+    prev.estado_pago !== curr.estado_pago
+  }
+>
+  {() => {
+    const cantidad = form.getFieldValue("cantidad") || 0;
+    const precioVenta = form.getFieldValue("precio_venta") || 0;
+    const montoPago = form.getFieldValue("monto_pago") || 0;
+    const total = cantidad * precioVenta;
+    const saldo = total - montoPago;
+
+    return (
+      <div className="text-end mt-3">
+        <p><strong>Total del Pedido:</strong> ${total.toFixed(2)}</p>
+        <p><strong>Saldo Pendiente:</strong> ${saldo > 0 ? saldo.toFixed(2) : "0.00"}</p>
+      </div>
+    );
+  }}
+</Form.Item>
+
 
   const handleSubmit = async (values) => {
     try {
@@ -92,7 +122,34 @@ const UpdatePedidoModal = ({ visible, onClose, pedido }) => {
         });
       }
 
-      onClose(true);
+      onClose(true, {
+      ...pedido,
+      prioridad: values.prioridad,
+      estado: values.estado,
+      fecha_estimada: values.fecha_estimada
+        ? dayjs(values.fecha_estimada).format("YYYY-MM-DD")
+        : pedido.fecha_estimada,
+      descripcion: values.descripcion,
+      detalles: [
+        {
+          ...pedido.detalles?.[0],
+          cantidad: values.cantidad,
+          precio_unitario: values.precio_unitario,
+          precio_venta: values.precio_venta,
+          descripcion: values.descripcion,
+          estado_pago: values.estado_pago,
+          monto_pago: values.monto_pago,
+        },
+      ],
+      pagos: [
+       {
+          ...pedido.pagos?.[0],
+          metodo: values.metodo_pago,
+          monto: values.monto_pago,
+        },
+      ],
+    });
+    ;
     } catch (err) {
       ErrorHandler(err);
     } finally {
@@ -198,6 +255,28 @@ const UpdatePedidoModal = ({ visible, onClose, pedido }) => {
             <InputNumber min={0} prefix="$" style={{ width: "100%" }} />
           </Form.Item>
         </div>
+        <Form.Item
+         shouldUpdate={(prev, curr) =>
+         prev.cantidad !== curr.cantidad ||
+         prev.precio_venta !== curr.precio_venta ||
+         prev.monto_pago !== curr.monto_pago
+        }
+         >
+           {() => {
+             const cantidad = form.getFieldValue("cantidad") || 0;
+             const precioVenta = form.getFieldValue("precio_venta") || 0;
+             const montoPago = form.getFieldValue("monto_pago") || 0;
+             const total = cantidad * precioVenta;
+             const saldo = total - montoPago;
+
+             return (
+               <div className="text-left mt-3">
+                 <p><strong>Total del Pedido:</strong> ${total.toFixed(2)}</p>
+                 <p><strong>Saldo Pendiente:</strong> ${saldo > 0 ? saldo.toFixed(2) : "0.00"}</p>
+               </div>
+             );
+           }}
+         </Form.Item>
 
         <div className="form-buttons">
           <Space>

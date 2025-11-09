@@ -1,208 +1,191 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Table,
+  Button,
+  Space,
+  Modal,
   Form,
   Input,
-  Button,
-  Popconfirm,
   message,
-  Space,
-  Card,
-  Tooltip,
 } from 'antd';
-import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
+import {
+  EditOutlined,
+  DeleteOutlined,
+  PlusOutlined,
+} from '@ant-design/icons';
 import apiProveedores from '../../api/apiProveedores';
-
-const ProveedoresContainer = () => {
+import './proveedores.css'; // nuevo CSS moderno
+const UpdateProveedores = () => {
   const [proveedores, setProveedores] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [editingId, setEditingId] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [editingProveedor, setEditingProveedor] = useState(null);
   const [form] = Form.useForm();
-
-  // Cargar proveedores
-  const fetchProveedores = async () => {
-    setLoading(true);
-    try {
-      const data = await apiProveedores.getAll();
-      setProveedores(data);
-    } catch (error) {
-      message.error('Error al cargar los proveedores');
-    } finally {
-      setLoading(false);
-    }
-  };
 
   useEffect(() => {
     fetchProveedores();
   }, []);
 
-  // Crear o actualizar proveedor
-  const onFinish = async (values) => {
+  const fetchProveedores = async () => {
     try {
-      if (editingId) {
-        await apiProveedores.update(editingId, values);
+      const res = await apiProveedores.getAll();
+      setProveedores(res);
+    } catch (error) {
+      console.error(error);
+      message.error('Error al obtener proveedores');
+    }
+  };
+
+  const openModal = (proveedor = null) => {
+    setEditingProveedor(proveedor);
+    if (proveedor) {
+      form.setFieldsValue({
+        nombre: proveedor.nombre,
+        contacto: proveedor.contacto,
+        telefono: proveedor.telefono,
+        email: proveedor.email,
+        direccion: proveedor.direccion,
+      });
+    } else {
+      form.resetFields();
+    }
+    setModalVisible(true);
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await apiProveedores.delete(id);
+      message.success('Proveedor eliminado correctamente');
+      fetchProveedores();
+    } catch (error) {
+      console.error(error);
+      message.error('Error al eliminar proveedor');
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      if (editingProveedor) {
+        await apiProveedores.update(editingProveedor.id_proveedor, values);
         message.success('Proveedor actualizado correctamente');
       } else {
         await apiProveedores.create(values);
         message.success('Proveedor agregado correctamente');
       }
-      form.resetFields();
-      setEditingId(null);
+      setModalVisible(false);
       fetchProveedores();
     } catch (error) {
-      message.error('Error al guardar el proveedor');
+      console.error(error);
+      message.error('Error al guardar proveedor');
     }
-  };
-
-  // Eliminar proveedor
-  const eliminarProveedor = async (id) => {
-    try {
-      await apiProveedores.delete(id);
-      message.success('Proveedor eliminado');
-      fetchProveedores();
-    } catch (error) {
-      message.error('Error al eliminar proveedor');
-    }
-  };
-
-  // Editar proveedor (rellena el form)
-  const editarProveedor = (record) => {
-    form.setFieldsValue(record);
-    setEditingId(record.id_proveedor);
   };
 
   const columns = [
-    {
-      title: 'Nombre',
-      dataIndex: 'nombre',
-      key: 'nombre',
-    },
-    {
-      title: 'Contacto',
-      dataIndex: 'contacto',
-      key: 'contacto',
-    },
-    {
-      title: 'Teléfono',
-      dataIndex: 'telefono',
-      key: 'telefono',
-    },
-    {
-      title: 'Email',
-      dataIndex: 'email',
-      key: 'email',
-    },
-    {
-      title: 'Dirección',
-      dataIndex: 'direccion',
-      key: 'direccion',
-    },
+    { title: 'Nombre', dataIndex: 'nombre', key: 'nombre' },
+    { title: 'Contacto', dataIndex: 'contacto', key: 'contacto' },
+    { title: 'Teléfono', dataIndex: 'telefono', key: 'telefono' },
+    { title: 'Email', dataIndex: 'email', key: 'email' },
+    { title: 'Dirección', dataIndex: 'direccion', key: 'direccion' },
     {
       title: 'Acciones',
       key: 'acciones',
       align: 'center',
       render: (_, record) => (
-        <Space size="middle">
-          <Tooltip title="Editar">
-            <Button
-              type="text"
-              icon={<EditOutlined style={{ color: '#1677ff' }} />}
-              onClick={() => editarProveedor(record)}
-            />
-          </Tooltip>
-
-          <Tooltip title="Eliminar">
-            <Popconfirm
-              title="¿Seguro que deseas eliminar este proveedor?"
-              onConfirm={() => eliminarProveedor(record.id_proveedor)}
-              okText="Sí"
-              cancelText="No"
-            >
-              <Button
-                type="text"
-                icon={<DeleteOutlined style={{ color: 'red' }} />}
-              />
-            </Popconfirm>
-          </Tooltip>
+        <Space>
+          <Button
+            icon={<EditOutlined />}
+            onClick={() => openModal(record)}
+          >
+            Editar
+          </Button>
+          <Button
+            icon={<DeleteOutlined />}
+            danger
+            onClick={() => handleDelete(record.id_proveedor)}
+          >
+            Eliminar
+          </Button>
         </Space>
       ),
     },
   ];
 
   return (
-    <Card
-      title={editingId ? 'Editar Proveedor' : 'Agregar Proveedor'}
-      bordered={false}
-      style={{ maxWidth: 900, margin: '0 auto', textAlign: 'center' }}
-    >
-      <Form
-        form={form}
-        layout="vertical"
-        onFinish={onFinish}
-        style={{
-          marginBottom: 24,
-          maxWidth: 500,
-          marginLeft: 'auto',
-          marginRight: 'auto',
-          textAlign: 'left',
-        }}
-      >
-        <Form.Item
-          name="nombre"
-          label="Nombre"
-          rules={[{ required: true, message: 'El nombre es obligatorio' }]}
+    <div className="proveedores-container container">
+      <div className="header-section">
+        <h2 className="proveedores-title">Gestión de Proveedores</h2>
+        <div className="title-divider"></div>
+      </div>
+
+      <div className="d-flex justify-content-center mb-3">
+        <Button
+          type="primary"
+          icon={<PlusOutlined />}
+          onClick={() => openModal()}
+          className="btn-nuevo-proveedor"
         >
-          <Input placeholder="Nombre del proveedor" />
-        </Form.Item>
-
-        <Form.Item
-        rules={[{ required: true, message: 'El nombre es obligatorio' }]}
-         name="contacto" label="Contacto">
-          <Input placeholder="Nombre de contacto" />
-          
-        </Form.Item>
-
-        <Form.Item
-         name="telefono" label="Teléfono">
-          <Input placeholder="Teléfono del proveedor" />
-        </Form.Item>
-
-        <Form.Item name="email" label="Email">
-          <Input placeholder="Correo electrónico" type="email" />
-        </Form.Item>
-
-        <Form.Item name="direccion" label="Dirección">
-          <Input placeholder="Dirección del proveedor" />
-        </Form.Item>
-
-        <Form.Item style={{ textAlign: 'center' }}>
-          <Space>
-            <Button type="primary" htmlType="submit">
-              {editingId ? 'Actualizar' : 'Agregar'}
-            </Button>
-            {editingId && (
-              <Button
-                onClick={() => {
-                  form.resetFields();
-                  setEditingId(null);
-                }}
-              >
-                Cancelar
-              </Button>
-            )}
-          </Space>
-        </Form.Item>
-      </Form>
+          Nuevo Proveedor
+        </Button>
+      </div>
 
       <Table
+        className="tabla-proveedores"
         columns={columns}
         dataSource={proveedores}
         rowKey="id_proveedor"
-        loading={loading}
-        pagination={{ pageSize: 5 }}
+        bordered
       />
-    </Card>
+
+      <Modal
+        title={editingProveedor ? 'Editar Proveedor' : 'Nuevo Proveedor'}
+        open={modalVisible}
+        onOk={handleSubmit}
+        onCancel={() => setModalVisible(false)}
+        okText="Guardar"
+        cancelText="Cancelar"
+        className="modal-proveedor"
+        centered
+      >
+        <Form form={form} layout="vertical" className="form-proveedor">
+          <Form.Item
+            name="nombre"
+            label="Nombre del Proveedor"
+            rules={[{ required: true, message: 'Ingrese el nombre del proveedor' }]}
+          >
+            <Input placeholder="Ej: Textiles Mendoza" />
+          </Form.Item>
+
+          <Form.Item
+            name="contacto"
+            label="Nombre de Contacto"
+            rules={[{ required: true, message: 'Ingrese el nombre de contacto' }]}
+          >
+            <Input placeholder="Ej: Juan Pérez" />
+          </Form.Item>
+
+          <Form.Item
+            name="telefono"
+            label="Teléfono"
+            rules={[{ required: true, message: 'Ingrese el teléfono' }]}
+          >
+            <Input placeholder="Ej: +54 9 11 1234-5678" />
+          </Form.Item>
+
+          <Form.Item
+            name="email"
+            label="Correo Electrónico"
+            rules={[{ type: 'email', message: 'Ingrese un email válido' }]}
+          >
+            <Input placeholder="Ej: contacto@textilesmendoza.com" />
+          </Form.Item>
+
+          <Form.Item name="direccion" label="Dirección">
+            <Input placeholder="Ej: Av. San Martín 123, Mendoza" />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
   );
 };
 
-export default ProveedoresContainer;
+export default UpdateProveedores;

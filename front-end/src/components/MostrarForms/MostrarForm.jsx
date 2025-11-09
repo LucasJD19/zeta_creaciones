@@ -192,20 +192,15 @@ const columns = [
       <div style={{ display: 'flex', gap: 4, justifyContent: 'center' }}>
         <EditButton 
           record={record} 
-          onUpdated={async (id, nuevoRegistro) => {
-            try {
-              await apiPedidos.update(id, nuevoRegistro);
-              const updated = pedidos.map(p => 
-                p.id_pedido === id ? { ...p, ...nuevoRegistro } : p
-              );
-              setPedidos(updated);
-              message.success('Pedido actualizado correctamente');
-            } catch (err) {
-              console.error(err);
-              ErrorHandler(err);
-            }
+          onUpdated={(id, pedidoActualizado) => {
+            const updatedPedidos = pedidos.map(p =>
+              p.id_pedido === id ? { ...p, ...pedidoActualizado } : p
+            );
+            setPedidos(updatedPedidos);
+            message.success('Pedido actualizado correctamente');
           }} 
         />
+
         <DeleteButton
           recordId={record.id_pedido}
           pedidos={pedidos}

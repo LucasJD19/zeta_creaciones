@@ -68,7 +68,7 @@ function App() {
         }
       />
       <Route
-        path="/mis-pedidos"
+        path="/pedidos/mis-pedidos"
         element={
           <ProtectedRoute>
             <MisPedidos pedidos={pedidos} setPedidos={setPedidos} />
@@ -78,7 +78,7 @@ function App() {
 
       {/* Nueva ruta: Historial de pedidos */}
       <Route
-        path="/historial-pedidos"
+        path="/pedidos/historial-pedidos"
         element={
           <ProtectedRoute>
             <HistorialPedidos />

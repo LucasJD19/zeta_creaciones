@@ -3,6 +3,8 @@ import { Table, Button, Space, Modal, Form, Input, InputNumber, Select, message 
 import { EditOutlined, DeleteOutlined, PlusOutlined } from '@ant-design/icons';
 import apiProductos from '../../api/apiProductos';
 import apiProveedores from '../../api/apiProveedores';
+import './UpdateProduct.css'; // nuevo CSS moderno
+
 const { Option } = Select;
 
 const UpdateProduct = () => {
@@ -41,15 +43,14 @@ const UpdateProduct = () => {
   };
 
   const fetchProveedores = async () => {
-  try {
-    const res = await apiProveedores.getAll(); // endpoint real
-    setProveedores(res);
-  } catch (error) {
-    console.error(error);
-    message.error('Error al obtener proveedores');
-  }
- };
-
+    try {
+      const res = await apiProveedores.getAll();
+      setProveedores(res);
+    } catch (error) {
+      console.error(error);
+      message.error('Error al obtener proveedores');
+    }
+  };
 
   const openModal = (producto = null) => {
     setEditingProducto(producto);
@@ -118,18 +119,29 @@ const UpdateProduct = () => {
   ];
 
   return (
-    <div>
-      <h2>Gestión de Productos</h2>
-      <Button
+    <div className="productos-container container">
+      <div className="header-section">
+        <h2 className="productos-title">Gestión de Productos</h2>
+        <div className="title-divider"></div>
+      </div>
+
+      <div className="d-flex justify-content-center mb-3">
+      <Button 
         type="primary"
         icon={<PlusOutlined />}
         onClick={() => openModal()}
-        style={{ marginBottom: 20 }}
+        className="btn-nuevo-producto"
       >
         Nuevo Producto
       </Button>
-
-      <Table columns={columns} dataSource={productos} rowKey="id_producto" />
+      </div>
+      <Table
+        className="tabla-productos"
+        columns={columns}
+        dataSource={productos}
+        rowKey="id_producto"
+        bordered
+      />
 
       <Modal
         title={editingProducto ? 'Editar Producto' : 'Nuevo Producto'}
@@ -137,14 +149,15 @@ const UpdateProduct = () => {
         onOk={handleSubmit}
         onCancel={() => setModalVisible(false)}
         okText="Guardar"
+        className="modal-producto"
       >
-        <Form form={form} layout="vertical">
+        <Form form={form} layout="vertical" className="form-producto">
           <Form.Item
             name="nombre"
             label="Nombre"
             rules={[{ required: true, message: 'Ingrese el nombre' }]}
           >
-            <Input />
+            <Input placeholder="Ej: Remera oversize blanca" />
           </Form.Item>
 
           <Form.Item
@@ -171,29 +184,29 @@ const UpdateProduct = () => {
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
 
-           <Form.Item
-             name="id_categoria"
-             label="Categoría"
-             rules={[{ required: true, message: 'Seleccione categoría' }]}
-            >
-             <Select placeholder="Seleccione categoría">
-               {categorias.map(cat => (
-                 <Option key={cat.id_categoria} value={cat.id_categoria}>{cat.nombre}</Option>
-               ))}
-             </Select>
-           </Form.Item>
+          <Form.Item
+            name="id_categoria"
+            label="Categoría"
+            rules={[{ required: true, message: 'Seleccione categoría' }]}
+          >
+            <Select placeholder="Seleccione categoría">
+              {categorias.map(cat => (
+                <Option key={cat.id_categoria} value={cat.id_categoria}>
+                  {cat.nombre}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
 
-           <Form.Item
-             name="id_proveedor"
-             label="Proveedor"
-           >
-             <Select placeholder="Seleccione proveedor" allowClear>
-               {proveedores.map(prov => (
-                 <Option key={prov.id_proveedor} value={prov.id_proveedor}>{prov.nombre}</Option>
-               ))}
-             </Select>
-           </Form.Item>
-           
+          <Form.Item name="id_proveedor" label="Proveedor">
+            <Select placeholder="Seleccione proveedor" allowClear>
+              {proveedores.map(prov => (
+                <Option key={prov.id_proveedor} value={prov.id_proveedor}>
+                  {prov.nombre}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
         </Form>
       </Modal>
     </div>
